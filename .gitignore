@@ -59,3 +59,8 @@ coverage/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Application specific
+config/settings.json
+assets/athan/*.mp3
+assets/sounds/*.mp3

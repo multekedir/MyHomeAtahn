@@ -1,0 +1,27 @@
+{
+  "name": "athan-clock",
+  "version": "1.0.0",
+  "description": "Fullscreen Linux Athan Clock Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "install-service": "sudo cp scripts/athan-clock.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable athan-clock.service"
+  },
+  "keywords": [
+    "athan",
+    "prayer",
+    "clock",
+    "islamic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "adhan": "^4.0.0",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "electron": "^27.0.0"
+  }
+}

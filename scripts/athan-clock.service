@@ -1,0 +1,15 @@
+[Unit]
+Description=Athan Clock Display
+After=graphical.target network.target
+
+[Service]
+Type=simple
+User=%i
+Environment=DISPLAY=:0
+WorkingDirectory=/home/%i/athan-clock
+ExecStart=/usr/bin/electron /home/%i/athan-clock/main.js --fullscreen
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=graphical.target

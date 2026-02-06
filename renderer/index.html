@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athan Clock</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="ramadan-banner" class="ramadan-banner hidden">
+        <span id="ramadan-day">Ramadan Day 15/30</span>
+    </div>
+
+    <div class="container">
+        <div id="clock-display" class="clock-display">
+            <div class="current-time" id="current-time">12:00:00 PM</div>
+            
+            <div class="next-prayer" id="next-prayer-container">
+                <div class="next-prayer-label">Next:</div>
+                <div class="next-prayer-name" id="next-prayer-name">Asr</div>
+                <div class="next-prayer-countdown" id="next-prayer-countdown">1:23:15</div>
+            </div>
+
+            <div class="prayer-times" id="prayer-times">
+                <div class="prayer-item" data-prayer="fajr">
+                    <div class="prayer-name">Fajr</div>
+                    <div class="prayer-time" id="fajr-time">5:42 AM</div>
+                    <span class="prayer-checkmark hidden" id="fajr-check">✓</span>
+                </div>
+                <div class="prayer-item" data-prayer="dhuhr">
+                    <div class="prayer-name">Dhuhr</div>
+                    <div class="prayer-time" id="dhuhr-time">12:34 PM</div>
+                    <span class="prayer-checkmark hidden" id="dhuhr-check">✓</span>
+                </div>
+                <div class="prayer-item" data-prayer="asr">
+                    <div class="prayer-name">Asr</div>
+                    <div class="prayer-time" id="asr-time">3:45 PM</div>
+                    <span class="prayer-checkmark hidden" id="asr-check">✓</span>
+                </div>
+                <div class="prayer-item" data-prayer="maghrib">
+                    <div class="prayer-name">Maghrib</div>
+                    <div class="prayer-time" id="maghrib-time">6:12 PM</div>
+                    <span class="prayer-checkmark hidden" id="maghrib-check">✓</span>
+                </div>
+                <div class="prayer-item" data-prayer="isha">
+                    <div class="prayer-name">Isha</div>
+                    <div class="prayer-time" id="isha-time">7:45 PM</div>
+                    <span class="prayer-checkmark hidden" id="isha-check">✓</span>
+                </div>
+            </div>
+
+            <div class="date-display">
+                <div class="hijri-date" id="hijri-date">Thursday, Sha'ban 15, 1447 AH</div>
+                <div class="gregorian-date" id="gregorian-date">February 6, 2026</div>
+            </div>
+        </div>
+
+        <div id="athan-display" class="athan-display hidden">
+            <div class="athan-prayer-name" id="athan-prayer-name">FAJR</div>
+            <div class="athan-time" id="athan-time">5:42 AM</div>
+            <div class="athan-animation"></div>
+        </div>
+
+        <div id="iftar-display" class="iftar-display hidden">
+            <div class="iftar-dua-arabic">اللهم لك صمت وعلى رزقك أفطرت</div>
+            <div class="iftar-dua-english">Allahumma laka sumtu wa 'ala rizqika aftartu</div>
+        </div>
+    </div>
+
+    <audio id="athan-audio" preload="auto"></audio>
+    <audio id="notification-audio" preload="auto"></audio>
+
+    <script src="prayer.js"></script>
+    <script src="clock.js"></script>
+</body>
+</html>

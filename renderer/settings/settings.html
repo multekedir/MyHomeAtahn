@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athan Clock Settings</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="settings-container">
+        <header class="settings-header">
+            <h1>🕌 Athan Clock Settings</h1>
+            <p>Configure your prayer times and display preferences</p>
+        </header>
+
+        <div class="settings-content">
+            <form id="settings-form">
+                <!-- Location Settings -->
+                <section class="settings-section">
+                    <h2>📍 Location Settings</h2>
+                    <div class="form-group">
+                        <label for="city">City Name</label>
+                        <input type="text" id="city" name="city" placeholder="e.g., Mecca, Saudi Arabia">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="latitude">Latitude</label>
+                            <input type="number" id="latitude" name="latitude" step="0.0001" min="-90" max="90" placeholder="21.3891">
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude">Longitude</label>
+                            <input type="number" id="longitude" name="longitude" step="0.0001" min="-180" max="180" placeholder="39.8579">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="auto-detect-location" class="btn btn-secondary">🌍 Auto-detect Location</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="timezone">Timezone</label>
+                        <input type="text" id="timezone" name="timezone" readonly placeholder="Auto-detected">
+                    </div>
+                </section>
+
+                <!-- Calculation Method -->
+                <section class="settings-section">
+                    <h2>🕐 Calculation Method</h2>
+                    <div class="form-group">
+                        <label for="calculation-method">Prayer Time Calculation Method</label>
+                        <select id="calculation-method" name="calculationMethod">
+                            <option value="ISNA">ISNA (North America)</option>
+                            <option value="MuslimWorldLeague">Muslim World League</option>
+                            <option value="Egyptian">Egyptian</option>
+                            <option value="UmmAlQura">Umm al-Qura</option>
+                            <option value="Karachi">Karachi</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Time Adjustments -->
+                <section class="settings-section">
+                    <h2>⏰ Time Adjustments</h2>
+                    <p class="section-description">Adjust prayer times to match your local mosque (in minutes)</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fajr-adjust">Fajr</label>
+                            <input type="number" id="fajr-adjust" name="fajrAdjust" min="-15" max="15" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="dhuhr-adjust">Dhuhr</label>
+                            <input type="number" id="dhuhr-adjust" name="dhuhrAdjust" min="-15" max="15" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="asr-adjust">Asr</label>
+                            <input type="number" id="asr-adjust" name="asrAdjust" min="-15" max="15" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="maghrib-adjust">Maghrib</label>
+                            <input type="number" id="maghrib-adjust" name="maghribAdjust" min="-15" max="15" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="isha-adjust">Isha</label>
+                            <input type="number" id="isha-adjust" name="ishaAdjust" min="-15" max="15" value="0">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Athan Audio Settings -->
+                <section class="settings-section">
+                    <h2>🔊 Athan Audio Settings</h2>
+                    <div class="form-group">
+                        <label for="default-athan">Default Athan</label>
+                        <select id="default-athan" name="defaultAthan">
+                            <option value="makkah.mp3">Makkah</option>
+                            <option value="madinah.mp3">Madinah</option>
+                            <option value="mishary.mp3">Mishary</option>
+                            <option value="abdulbasit.mp3">Abdul Basit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fajr-athan">Fajr Athan (Optional)</label>
+                        <select id="fajr-athan" name="fajrAthan">
+                            <option value="makkah.mp3">Makkah</option>
+                            <option value="madinah.mp3">Madinah</option>
+                            <option value="mishary.mp3">Mishary</option>
+                            <option value="abdulbasit.mp3">Abdul Basit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="athan-volume">Volume (%)</label>
+                        <input type="range" id="athan-volume" name="athanVolume" min="0" max="100" value="80">
+                        <span id="volume-display">80%</span>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="test-athan" class="btn btn-secondary">▶️ Test Athan</button>
+                    </div>
+                </section>
+
+                <!-- Display Settings -->
+                <section class="settings-section">
+                    <h2>🖥️ Display Settings</h2>
+                    <div class="form-group">
+                        <label for="time-format">Time Format</label>
+                        <select id="time-format" name="timeFormat">
+                            <option value="12">12-hour (AM/PM)</option>
+                            <option value="24">24-hour</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="brightness">Screen Brightness (%)</label>
+                        <input type="range" id="brightness" name="brightness" min="10" max="100" value="100">
+                        <span id="brightness-display">100%</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="night-mode-start">Night Mode Start (Hour)</label>
+                            <input type="number" id="night-mode-start" name="nightModeStart" min="0" max="23" value="22">
+                        </div>
+                        <div class="form-group">
+                            <label for="night-mode-end">Night Mode End (Hour)</label>
+                            <input type="number" id="night-mode-end" name="nightModeEnd" min="0" max="23" value="6">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language" name="language">
+                            <option value="en">English</option>
+                            <option value="ar">Arabic</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Ramadan Mode -->
+                <section class="settings-section">
+                    <h2>🌙 Ramadan Mode</h2>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ramadan-enabled" name="ramadanEnabled">
+                            <span>Enable Ramadan Mode</span>
+                        </label>
+                    </div>
+                    <div id="ramadan-dates" class="ramadan-dates hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ramadan-start">Ramadan Start Date</label>
+                                <input type="date" id="ramadan-start" name="ramadanStart">
+                            </div>
+                            <div class="form-group">
+                                <label for="ramadan-end">Ramadan End Date</label>
+                                <input type="date" id="ramadan-end" name="ramadanEnd">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="auto-detect-ramadan" class="btn btn-secondary">Auto-detect Ramadan Dates</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Save Button -->
+                <div class="form-actions">
+                    <button type="submit" id="save-settings" class="btn btn-primary">💾 Save Settings</button>
+                    <div id="save-message" class="save-message hidden"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>

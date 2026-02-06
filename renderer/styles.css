@@ -1,0 +1,320 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    background-color: #1a1a1a;
+    color: #f5f5dc;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Ramadan Banner */
+.ramadan-banner {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 32px;
+    color: #ffd700;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.ramadan-banner.hidden {
+    display: none;
+}
+
+/* Clock Display */
+.clock-display {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+}
+
+.current-time {
+    font-size: 180px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    text-align: center;
+    color: #f5f5dc;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.next-prayer {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.next-prayer-label {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #d4af37;
+}
+
+.next-prayer-name {
+    font-size: 50px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #f5f5dc;
+}
+
+.next-prayer-countdown {
+    font-size: 70px;
+    font-weight: bold;
+    color: #f5f5dc;
+    transition: color 0.3s ease;
+}
+
+.next-prayer-countdown.warning {
+    color: #ff8c00;
+    animation: pulse 2s infinite;
+}
+
+.next-prayer-countdown.urgent {
+    color: #ff4444;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.prayer-times {
+    display: flex;
+    justify-content: space-around;
+    width: 90%;
+    max-width: 1400px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.prayer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-width: 200px;
+}
+
+.prayer-name {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #d4af37;
+    font-weight: bold;
+}
+
+.prayer-time {
+    font-size: 40px;
+    color: #f5f5dc;
+    position: relative;
+}
+
+.prayer-checkmark {
+    position: absolute;
+    top: -10px;
+    right: -30px;
+    font-size: 50px;
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.prayer-checkmark.hidden {
+    display: none;
+}
+
+/* Ramadan specific labels */
+.prayer-item[data-prayer="fajr"] .prayer-name.ramadan-label::after {
+    content: " (Suhoor ends)";
+    font-size: 24px;
+    color: #ffd700;
+}
+
+.prayer-item[data-prayer="maghrib"] .prayer-name.ramadan-label::after {
+    content: " (Iftar)";
+    font-size: 24px;
+    color: #ffd700;
+}
+
+.date-display {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.hijri-date {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #d4af37;
+}
+
+.gregorian-date {
+    font-size: 24px;
+    color: #f5f5dc;
+}
+
+/* Athan Display */
+.athan-display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    z-index: 100;
+}
+
+.athan-display.hidden {
+    display: none;
+}
+
+.athan-prayer-name {
+    font-size: 200px;
+    font-weight: bold;
+    color: #f5f5dc;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+    animation: athanPulse 2s infinite;
+}
+
+@keyframes athanPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+.athan-time {
+    font-size: 80px;
+    color: #d4af37;
+    margin-bottom: 40px;
+}
+
+.athan-animation {
+    width: 200px;
+    height: 200px;
+    border: 4px solid #f5f5dc;
+    border-radius: 50%;
+    animation: athanRing 2s infinite;
+}
+
+@keyframes athanRing {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Iftar Display */
+.iftar-display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(26, 26, 26, 0.95);
+    z-index: 101;
+}
+
+.iftar-display.hidden {
+    display: none;
+}
+
+.iftar-dua-arabic {
+    font-size: 64px;
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+    direction: rtl;
+}
+
+.iftar-dua-english {
+    font-size: 36px;
+    color: #f5f5dc;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Suhoor Warning */
+.suhoor-warning {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    color: #ff4444;
+    font-weight: bold;
+    z-index: 50;
+    animation: urgentPulse 0.5s infinite;
+}
+
+@keyframes urgentPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .current-time {
+        font-size: 120px;
+    }
+    
+    .next-prayer-countdown {
+        font-size: 50px;
+    }
+    
+    .prayer-times {
+        flex-direction: column;
+        align-items: center;
+    }
+}
