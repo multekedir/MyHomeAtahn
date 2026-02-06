@@ -18,16 +18,17 @@ class AthanClock {
     }
 
     async init() {
-        // Load settings
-        await this.calculator.loadSettings();
-        this.settings = this.calculator.settings;
-        
-        // Calculate initial prayer times
-        this.updatePrayerTimes();
-        
-        // Start clock updates
+        // Show real time immediately (before settings load)
         this.updateClock();
         setInterval(() => this.updateClock(), 1000);
+
+        // Load settings (clock already running with system time)
+        await this.calculator.loadSettings();
+        this.settings = this.calculator.settings;
+
+        // Recalculate with settings (timezone, location for prayer times)
+        this.updatePrayerTimes();
+        this.updateClock();
         
         // Check for prayer times every second
         setInterval(() => this.checkPrayerTimes(), 1000);
@@ -53,18 +54,16 @@ class AthanClock {
         const timeString = this.formatTimeForDisplay(now, timeFormat === '24', timeZone);
         const el = document.getElementById('current-time');
         if (el) el.textContent = timeString;
-        
-        // Update next prayer countdown
-        this.updateNextPrayer();
-        
-        // Update completed prayers
-        this.updateCompletedPrayers();
-        
-        // Update dates
+
+        // Update dates (safe without settings)
         this.updateDates();
-        
-        // Update Ramadan display
-        this.updateRamadanDisplay();
+
+        // Prayer-related updates only after settings/times are loaded
+        if (this.calculator.prayerTimes) {
+            this.updateNextPrayer();
+            this.updateCompletedPrayers();
+            this.updateRamadanDisplay();
+        }
     }
 
     /** Format time for main clock — system time when timeZone omitted, else that zone */
@@ -94,15 +93,17 @@ class AthanClock {
         }
     }
 
-    formatTime(date, format24 = false, timeZone = undefined) {
+    formatTime(date, format24 = false, timeZone = undefined, includeSeconds = true) {
         const { hour: hours, minute: minutes, second: seconds } = this.getTimePartsInZone(date, timeZone);
         const ampm = hours >= 12 ? 'PM' : 'AM';
         
         if (format24) {
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const base = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            return includeSeconds ? `${base}:${String(seconds).padStart(2, '0')}` : base;
         } else {
             const displayHours = hours % 12 || 12;
-            return `${displayHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
+            const base = `${displayHours}:${String(minutes).padStart(2, '0')}`;
+            return includeSeconds ? `${base}:${String(seconds).padStart(2, '0')} ${ampm}` : `${base} ${ampm}`;
         }
     }
 
@@ -116,7 +117,7 @@ class AthanClock {
         
         prayers.forEach(prayer => {
             const time = this.calculator.prayerTimes[prayer];
-            const timeString = this.formatTime(time, timeFormat === '24', timeZone);
+            const timeString = this.formatTime(time, timeFormat === '24', timeZone, false);
             document.getElementById(`${prayer}-time`).textContent = timeString;
         });
     }

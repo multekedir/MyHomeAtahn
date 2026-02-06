@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="themes/earthy-frame/theme.css">
 </head>
 <body>
-    <div class="pattern" style="background-image: url('themes/earthy-frame/pattern.svg')" aria-hidden="true"></div>
+    <div class="pattern" aria-hidden="true"></div>
 
     <div id="ramadan-banner" class="ramadan-banner hidden">
         <span id="ramadan-day">Ramadan Day 15/30</span>
@@ -21,8 +21,8 @@
         <div id="clock-display" class="clock-display">
             <!-- Top zone: time + date line -->
             <div class="top-block">
-                <div id="current-time" class="time">6:45 PM</div>
-                <div id="dateLine" class="dateLine">Mon, Apr 15 • 15 Sha'ban 1447 AH</div>
+                <div id="current-time" class="time">--:--:-- --</div>
+                <div id="dateLine" class="dateLine">--</div>
             </div>
             <!-- Legacy date (hidden when dateLine is used) -->
             <div class="date-display date-top" aria-hidden="true">
@@ -77,7 +77,6 @@
     <audio id="athan-audio" preload="auto"></audio>
     <audio id="notification-audio" preload="auto"></audio>
 
-    <script src="prayer.js"></script>
     <script src="clock.js"></script>
 </body>
 </html>

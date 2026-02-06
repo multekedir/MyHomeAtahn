@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520">
   <defs>
-    <!-- Classic 8-point star (outer and inner points) -->
     <g id="star8" transform="translate(130, 130)">
       <path d="M100 0 L37 37 L0 100 L-37 37 L-100 0 L-37 -37 L0 -100 L37 -37 Z" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
       <path d="M71 0 L26 26 L0 71 L-26 26 L-71 0 L-26 -26 L0 -71 L26 -26 Z" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>

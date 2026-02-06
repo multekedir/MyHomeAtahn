@@ -94,6 +94,7 @@ class PrayerCalculator {
         if (!this.prayerTimes) {
             this.prayerTimes = this.calculatePrayerTimes();
         }
+        if (!this.prayerTimes) return null;
 
         const now = new Date();
         const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
