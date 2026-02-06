@@ -6,6 +6,7 @@ const fs = require('fs');
 
 let mainWindow;
 let settingsServer;
+let settingsHttpServer;
 const SETTINGS_PORT = 3000;
 
 // Ensure config directory exists
@@ -14,13 +15,13 @@ if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
 }
 
-// Default settings
+// Default settings (system time; location for prayer times)
 const defaultSettings = {
   location: {
-    city: 'Mecca',
-    latitude: 21.3891,
-    longitude: 39.8579,
-    timezone: 'Asia/Riyadh'
+    city: 'Portland',
+    latitude: 45.4619489360556,
+    longitude: -122.80151735583487
+    // no timezone = use system/local time for clock and date
   },
   calculationMethod: 'MuslimWorldLeague',
   timeAdjustments: {
@@ -112,7 +113,7 @@ function startSettingsServer() {
     }
   });
 
-  settingsServer.listen(SETTINGS_PORT, () => {
+  settingsHttpServer = settingsServer.listen(SETTINGS_PORT, () => {
     console.log(`Settings server running on http://localhost:${SETTINGS_PORT}`);
   });
 }
@@ -198,8 +199,8 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
-  if (settingsServer) {
-    settingsServer.close();
+  if (settingsHttpServer) {
+    settingsHttpServer.close();
   }
 });
 

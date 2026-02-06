@@ -15,12 +15,11 @@ class PrayerCalculator {
             return this.settings;
         } catch (error) {
             console.error('Error loading settings:', error);
-            // Use default settings
+            // Use default settings (system time; location for prayer times)
             this.settings = {
                 location: {
-                    latitude: 21.3891,
-                    longitude: 39.8579,
-                    timezone: 'Asia/Riyadh'
+                    latitude: 45.4619489360556,
+                    longitude: -122.80151735583487
                 },
                 calculationMethod: 'MuslimWorldLeague',
                 timeAdjustments: {
@@ -160,15 +159,32 @@ class PrayerCalculator {
         }
     }
 
-    isPrayerTime(prayerName) {
+    getTimePartsInZone(date, timeZone) {
+        if (!timeZone) {
+            return { hour: date.getHours(), minute: date.getMinutes(), second: date.getSeconds() };
+        }
+        try {
+            const f = new Intl.DateTimeFormat('en-CA', { timeZone, hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const parts = f.formatToParts(date);
+            const get = (t) => parseInt(parts.find(p => p.type === t)?.value ?? 0, 10);
+            return { hour: get('hour'), minute: get('minute'), second: get('second') };
+        } catch (e) {
+            return { hour: date.getHours(), minute: date.getMinutes(), second: date.getSeconds() };
+        }
+    }
+
+    isPrayerTime(prayerName, timeZone = undefined) {
         if (!this.prayerTimes) return false;
         
         const now = new Date();
         const prayerTime = this.prayerTimes[prayerName];
+        const nowParts = this.getTimePartsInZone(now, timeZone);
+        const prayerParts = this.getTimePartsInZone(prayerTime, timeZone);
         
-        // Check if current time matches prayer time (within 1 minute window)
-        const diff = Math.abs(now.getTime() - prayerTime.getTime());
-        return diff < 60000; // 1 minute window
+        // Only trigger once at the exact minute (compare in same timezone as display)
+        return nowParts.hour === prayerParts.hour &&
+               nowParts.minute === prayerParts.minute &&
+               nowParts.second === 0; // Only at :00 seconds
     }
 
     getCompletedPrayers() {

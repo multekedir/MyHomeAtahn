@@ -1,6 +1,7 @@
 const { ipcRenderer } = require('electron');
 const path = require('path');
 const PrayerCalculator = require(path.join(__dirname, 'prayer.js'));
+const hijriConverter = require('hijri-converter');
 
 class AthanClock {
     constructor() {
@@ -46,10 +47,12 @@ class AthanClock {
         const now = new Date();
         this.currentTime = now;
         
-        // Update current time display
+        // Update current time display — system time by default, or timezone from settings if set
         const timeFormat = this.settings?.display?.timeFormat || '12';
-        const timeString = this.formatTime(now, timeFormat === '24');
-        document.getElementById('current-time').textContent = timeString;
+        const timeZone = this.settings?.location?.timezone || undefined;
+        const timeString = this.formatTimeForDisplay(now, timeFormat === '24', timeZone);
+        const el = document.getElementById('current-time');
+        if (el) el.textContent = timeString;
         
         // Update next prayer countdown
         this.updateNextPrayer();
@@ -64,10 +67,35 @@ class AthanClock {
         this.updateRamadanDisplay();
     }
 
-    formatTime(date, format24 = false) {
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const seconds = date.getSeconds();
+    /** Format time for main clock — system time when timeZone omitted, else that zone */
+    formatTimeForDisplay(date, format24, timeZone) {
+        const opts = format24
+            ? { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }
+            : { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true };
+        if (timeZone) opts.timeZone = timeZone;
+        try {
+            return new Intl.DateTimeFormat('en-US', opts).format(date);
+        } catch (e) {
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: !format24 });
+        }
+    }
+
+    getTimePartsInZone(date, timeZone) {
+        try {
+            const f = new Intl.DateTimeFormat('en-CA', { timeZone: timeZone || 'America/Los_Angeles', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const parts = f.formatToParts(date);
+            const get = (t) => {
+                const p = parts.find(x => x.type === t);
+                return p ? parseInt(p.value, 10) : 0;
+            };
+            return { hour: get('hour'), minute: get('minute'), second: get('second') };
+        } catch (e) {
+            return { hour: date.getHours(), minute: date.getMinutes(), second: date.getSeconds() };
+        }
+    }
+
+    formatTime(date, format24 = false, timeZone = undefined) {
+        const { hour: hours, minute: minutes, second: seconds } = this.getTimePartsInZone(date, timeZone);
         const ampm = hours >= 12 ? 'PM' : 'AM';
         
         if (format24) {
@@ -81,13 +109,14 @@ class AthanClock {
     updatePrayerTimes() {
         this.calculator.prayerTimes = this.calculator.calculatePrayerTimes();
         
-        // Update prayer time displays
+        // Update prayer time displays (use timezone from settings; default Pacific)
         const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
         const timeFormat = this.settings?.display?.timeFormat || '12';
+        const timeZone = this.settings?.location?.timezone || 'America/Los_Angeles';
         
         prayers.forEach(prayer => {
             const time = this.calculator.prayerTimes[prayer];
-            const timeString = this.calculator.formatTime(time, timeFormat === '24');
+            const timeString = this.formatTime(time, timeFormat === '24', timeZone);
             document.getElementById(`${prayer}-time`).textContent = timeString;
         });
     }
@@ -95,21 +124,20 @@ class AthanClock {
     updateNextPrayer() {
         this.nextPrayer = this.calculator.getNextPrayer();
         
-        if (this.nextPrayer) {
-            const prayerName = this.nextPrayer.name.charAt(0).toUpperCase() + this.nextPrayer.name.slice(1);
-            document.getElementById('next-prayer-name').textContent = prayerName;
-            document.getElementById('next-prayer-countdown').textContent = this.nextPrayer.countdown;
-            
-            // Check for warnings
+        // Highlight only the next prayer cell (earthy-frame: single glow)
+        const cells = document.querySelectorAll('.prayerCell');
+        cells.forEach(cell => {
+            const isNext = this.nextPrayer && cell.getAttribute('data-prayer') === this.nextPrayer.name;
+            cell.classList.toggle('next', isNext);
+        });
+        
+        const countdownEl = document.getElementById('next-prayer-countdown');
+        if (this.nextPrayer && countdownEl) {
+            countdownEl.textContent = this.nextPrayer.countdown;
             const warning = this.calculator.getPrayerWarning(this.nextPrayer);
-            const countdownEl = document.getElementById('next-prayer-countdown');
-            
             countdownEl.classList.remove('warning', 'urgent');
-            if (warning === 'urgent') {
-                countdownEl.classList.add('urgent');
-            } else if (warning === 'warning') {
-                countdownEl.classList.add('warning');
-            }
+            if (warning === 'urgent') countdownEl.classList.add('urgent');
+            else if (warning === 'warning') countdownEl.classList.add('warning');
         }
     }
 
@@ -128,14 +156,34 @@ class AthanClock {
     }
 
     updateDates() {
-        // Simplified date display - in production, use proper Hijri calendar library
         const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const gregorianDate = now.toLocaleDateString('en-US', options);
-        document.getElementById('gregorian-date').textContent = gregorianDate;
+        const timeZone = this.settings?.location?.timezone || 'America/Los_Angeles';
+        const opts = { timeZone };
+        const gregorianLong = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', ...opts });
+        const gregorianShort = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', ...opts });
         
-        // Placeholder for Hijri date - would need proper conversion
-        document.getElementById('hijri-date').textContent = 'Hijri date calculation needed';
+        const gregorianEl = document.getElementById('gregorian-date');
+        if (gregorianEl) gregorianEl.textContent = gregorianLong;
+        
+        const hijriMonths = [
+            'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani',
+            'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban",
+            'Ramadan', 'Shawwal', 'Dhul-Qadah', 'Dhul-Hijjah'
+        ];
+        try {
+            const hijri = hijriConverter.toHijri(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            const hijriDateStr = `${hijri.hd} ${hijriMonths[hijri.hm - 1]} ${hijri.hy} AH`;
+            const hijriEl = document.getElementById('hijri-date');
+            if (hijriEl) hijriEl.textContent = hijriDateStr;
+            const dateLineEl = document.getElementById('dateLine');
+            if (dateLineEl) dateLineEl.textContent = `${gregorianShort} • ${hijriDateStr}`;
+        } catch (error) {
+            console.error('Error calculating Hijri date:', error);
+            const hijriEl = document.getElementById('hijri-date');
+            if (hijriEl) hijriEl.textContent = 'Hijri date calculation error';
+            const dateLineEl = document.getElementById('dateLine');
+            if (dateLineEl) dateLineEl.textContent = gregorianShort;
+        }
     }
 
     updateRamadanDisplay() {
@@ -150,8 +198,8 @@ class AthanClock {
             }
             
             // Update prayer labels for Ramadan
-            const fajrLabel = document.querySelector('[data-prayer="fajr"] .prayer-name');
-            const maghribLabel = document.querySelector('[data-prayer="maghrib"] .prayer-name');
+            const fajrLabel = document.querySelector('[data-prayer="fajr"] .prayerName');
+            const maghribLabel = document.querySelector('[data-prayer="maghrib"] .prayerName');
             
             if (fajrLabel) {
                 fajrLabel.classList.add('ramadan-label');
@@ -167,35 +215,40 @@ class AthanClock {
     }
 
     checkPrayerTimes() {
-        if (this.isAthanPlaying) return;
-        
-        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-        
-        for (let prayer of prayers) {
-            if (this.calculator.isPrayerTime(prayer)) {
-                this.playAthan(prayer);
-                break;
-            }
-        }
-        
-        // Check for pre-prayer warnings
-        if (this.nextPrayer) {
-            const warning = this.calculator.getPrayerWarning(this.nextPrayer);
-            if (warning === 'warning' && !this.isAthanPlaying) {
-                // Play subtle notification at 10 minutes
-                this.playNotification();
-            }
-        }
-        
-        // Check for Suhoor warning (Ramadan mode, 30 min before Fajr)
-        if (this.calculator.isRamadanMode() && this.nextPrayer && this.nextPrayer.name === 'fajr') {
-            const now = new Date();
-            const timeUntil = this.nextPrayer.time.getTime() - now.getTime();
-            const minutesUntil = Math.floor(timeUntil / 60000);
+        try {
+            if (this.isAthanPlaying) return;
             
-            if (minutesUntil <= 30 && minutesUntil > 0) {
-                this.showSuhoorWarning(minutesUntil);
+            const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+            
+            const timeZone = this.settings?.location?.timezone || 'America/Los_Angeles';
+            for (let prayer of prayers) {
+                if (this.calculator.isPrayerTime(prayer, timeZone)) {
+                    this.playAthan(prayer);
+                    break;
+                }
             }
+            
+            // Check for pre-prayer warnings
+            if (this.nextPrayer) {
+                const warning = this.calculator.getPrayerWarning(this.nextPrayer);
+                if (warning === 'warning' && !this.isAthanPlaying) {
+                    // Play subtle notification at 10 minutes
+                    this.playNotification();
+                }
+            }
+            
+            // Check for Suhoor warning (Ramadan mode, 30 min before Fajr)
+            if (this.calculator.isRamadanMode() && this.nextPrayer && this.nextPrayer.name === 'fajr') {
+                const now = new Date();
+                const timeUntil = this.nextPrayer.time.getTime() - now.getTime();
+                const minutesUntil = Math.floor(timeUntil / 60000);
+                
+                if (minutesUntil <= 30 && minutesUntil > 0) {
+                    this.showSuhoorWarning(minutesUntil);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking prayer times:', error);
         }
     }
 
@@ -225,7 +278,8 @@ class AthanClock {
         
         // Update time
         const timeFormat = this.settings?.display?.timeFormat || '12';
-        const timeString = this.formatTime(this.currentTime, timeFormat === '24');
+        const timeZone = this.settings?.location?.timezone || 'America/Los_Angeles';
+        const timeString = this.formatTime(this.currentTime, timeFormat === '24', timeZone);
         document.getElementById('athan-time').textContent = timeString;
         
         // Determine which audio file to play
@@ -238,8 +292,9 @@ class AthanClock {
         const path = require('path');
         const appPath = window.__APP_PATH__ || __dirname.replace('/renderer', '');
         const audioPath = path.join(appPath, 'assets', 'athan', audioFile);
-        // Use file:// protocol for local files
-        this.athanAudio.src = `file://${audioPath}`;
+        // Normalize path for different OS
+        const normalizedPath = audioPath.replace(/\\/g, '/');
+        this.athanAudio.src = `file:///${normalizedPath}`;
         this.athanAudio.volume = (this.settings?.athan?.volume || 80) / 100;
         
         // Fade in
@@ -299,8 +354,9 @@ class AthanClock {
             const path = require('path');
             const appPath = window.__APP_PATH__ || __dirname.replace('/renderer', '');
             const audioPath = path.join(appPath, 'assets', 'sounds', 'notification.mp3');
-            // Use file:// protocol for local files
-            this.notificationAudio.src = `file://${audioPath}`;
+            // Normalize path for different OS
+            const normalizedPath = audioPath.replace(/\\/g, '/');
+            this.notificationAudio.src = `file:///${normalizedPath}`;
             this.notificationAudio.volume = 0.3;
             await this.notificationAudio.play();
         } catch (error) {

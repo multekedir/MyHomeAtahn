@@ -4,54 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Athan Clock</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/earthy-frame/theme.css">
 </head>
 <body>
+    <div class="pattern" style="background-image: url('themes/earthy-frame/pattern.svg')" aria-hidden="true"></div>
+
     <div id="ramadan-banner" class="ramadan-banner hidden">
         <span id="ramadan-day">Ramadan Day 15/30</span>
     </div>
 
     <div class="container">
         <div id="clock-display" class="clock-display">
-            <div class="current-time" id="current-time">12:00:00 PM</div>
-            
-            <div class="next-prayer" id="next-prayer-container">
-                <div class="next-prayer-label">Next:</div>
-                <div class="next-prayer-name" id="next-prayer-name">Asr</div>
-                <div class="next-prayer-countdown" id="next-prayer-countdown">1:23:15</div>
+            <!-- Top zone: time + date line -->
+            <div class="top-block">
+                <div id="current-time" class="time">6:45 PM</div>
+                <div id="dateLine" class="dateLine">Mon, Apr 15 • 15 Sha'ban 1447 AH</div>
+            </div>
+            <!-- Legacy date (hidden when dateLine is used) -->
+            <div class="date-display date-top" aria-hidden="true">
+                <div class="gregorian-date" id="gregorian-date">February 6, 2026</div>
+                <div class="hijri-date" id="hijri-date">Thursday, Sha'ban 15, 1447 AH</div>
             </div>
 
-            <div class="prayer-times" id="prayer-times">
-                <div class="prayer-item" data-prayer="fajr">
-                    <div class="prayer-name">Fajr</div>
-                    <div class="prayer-time" id="fajr-time">5:42 AM</div>
+            <!-- Middle: prayer strip (5 columns, centered) -->
+            <div class="prayer-bar-middle">
+            <div class="prayerBar" id="prayer-times">
+                <div class="prayerCell" data-prayer="fajr">
+                    <span class="prayerName">Fajr</span>
+                    <span class="prayerTime" id="fajr-time">5:42 AM</span>
                     <span class="prayer-checkmark hidden" id="fajr-check">✓</span>
                 </div>
-                <div class="prayer-item" data-prayer="dhuhr">
-                    <div class="prayer-name">Dhuhr</div>
-                    <div class="prayer-time" id="dhuhr-time">12:34 PM</div>
+                <div class="prayerCell" data-prayer="dhuhr">
+                    <span class="prayerName">Dhuhr</span>
+                    <span class="prayerTime" id="dhuhr-time">12:34 PM</span>
                     <span class="prayer-checkmark hidden" id="dhuhr-check">✓</span>
                 </div>
-                <div class="prayer-item" data-prayer="asr">
-                    <div class="prayer-name">Asr</div>
-                    <div class="prayer-time" id="asr-time">3:45 PM</div>
+                <div class="prayerCell" data-prayer="asr">
+                    <span class="prayerName">Asr</span>
+                    <span class="prayerTime" id="asr-time">3:45 PM</span>
                     <span class="prayer-checkmark hidden" id="asr-check">✓</span>
                 </div>
-                <div class="prayer-item" data-prayer="maghrib">
-                    <div class="prayer-name">Maghrib</div>
-                    <div class="prayer-time" id="maghrib-time">6:12 PM</div>
+                <div class="prayerCell" data-prayer="maghrib">
+                    <span class="prayerName">Maghrib</span>
+                    <span class="prayerTime" id="maghrib-time">6:12 PM</span>
                     <span class="prayer-checkmark hidden" id="maghrib-check">✓</span>
                 </div>
-                <div class="prayer-item" data-prayer="isha">
-                    <div class="prayer-name">Isha</div>
-                    <div class="prayer-time" id="isha-time">7:45 PM</div>
+                <div class="prayerCell" data-prayer="isha">
+                    <span class="prayerName">Isha</span>
+                    <span class="prayerTime" id="isha-time">7:45 PM</span>
                     <span class="prayer-checkmark hidden" id="isha-check">✓</span>
                 </div>
             </div>
-
-            <div class="date-display">
-                <div class="hijri-date" id="hijri-date">Thursday, Sha'ban 15, 1447 AH</div>
-                <div class="gregorian-date" id="gregorian-date">February 6, 2026</div>
             </div>
         </div>
 

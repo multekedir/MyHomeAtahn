@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "install-service": "sudo cp scripts/athan-clock.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable athan-clock.service"
+    "install-service": "sudo cp scripts/athan-clock.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable athan-clock.service",
+    "test": "echo 'No tests yet'"
   },
   "keywords": [
     "athan",
@@ -18,8 +19,9 @@
   "license": "MIT",
   "dependencies": {
     "adhan": "^4.0.0",
+    "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "body-parser": "^1.20.2"
+    "hijri-converter": "^1.1.1"
   },
   "devDependencies": {
     "electron": "^27.0.0"

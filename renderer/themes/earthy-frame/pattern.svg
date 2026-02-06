@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520">
+  <defs>
+    <!-- Classic 8-point star (outer and inner points) -->
+    <g id="star8" transform="translate(130, 130)">
+      <path d="M100 0 L37 37 L0 100 L-37 37 L-100 0 L-37 -37 L0 -100 L37 -37 Z" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <path d="M71 0 L26 26 L0 71 L-26 26 L-71 0 L-26 -26 L0 -71 L26 -26 Z" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    </g>
+    <pattern id="tile" width="260" height="260" patternUnits="userSpaceOnUse">
+      <use href="#star8" x="0" y="0"/>
+      <use href="#star8" x="260" y="0"/>
+      <use href="#star8" x="0" y="260"/>
+      <use href="#star8" x="260" y="260"/>
+    </pattern>
+  </defs>
+  <rect width="520" height="520" fill="url(#tile)"/>
+</svg>
