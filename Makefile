@@ -1,20 +1,25 @@
-.PHONY: help install start dev clean install-service setup uninstall-service status logs test
+# Athan Clock — Makefile
+# Use: make help (default), make install, make start, etc.
+# Note: install-service, uninstall-service, status, logs are for Linux (systemd).
+
+.PHONY: help install start dev clean install-service setup uninstall-service status logs test open-settings
 
 # Default target
 help:
-	@echo "🕌 Athan Clock - Available Make Targets"
-	@echo "========================================"
+	@echo "🕌 Athan Clock - Make Targets"
+	@echo "============================="
 	@echo ""
-	@echo "  make install          - Install npm dependencies"
-	@echo "  make start            - Start the application"
-	@echo "  make dev              - Start in development mode"
-	@echo "  make setup            - Run full installation script"
-	@echo "  make install-service  - Install systemd service"
-	@echo "  make uninstall-service - Remove systemd service"
-	@echo "  make status           - Check systemd service status"
-	@echo "  make logs             - View systemd service logs"
-	@echo "  make clean            - Clean node_modules and build artifacts"
-	@echo "  make test             - Run tests (if available)"
+	@echo "  make install          Install npm dependencies"
+	@echo "  make start            Start the application (fullscreen)"
+	@echo "  make dev              Start in development mode"
+	@echo "  make open-settings    Print settings URL (open in browser when app is running)"
+	@echo "  make setup            Run full installation script (Linux)"
+	@echo "  make install-service  Install systemd service (Linux)"
+	@echo "  make uninstall-service Remove systemd service (Linux)"
+	@echo "  make status           Show systemd service status (Linux)"
+	@echo "  make logs             Follow systemd service logs (Linux)"
+	@echo "  make clean            Remove node_modules and config/*.json"
+	@echo "  make test             Run tests (placeholder)"
 	@echo ""
 
 # Install npm dependencies
@@ -32,48 +37,53 @@ dev:
 	@echo "🔧 Starting in development mode..."
 	npm run dev
 
-# Run the installation script
+# Remind user how to open settings
+open-settings:
+	@echo "With the app running, open: http://localhost:3000/settings.html"
+	@echo "Or press Ctrl+S (Cmd+S on Mac) in the app."
+
+# Run the installation script (Linux)
 setup:
 	@echo "⚙️  Running installation script..."
 	chmod +x scripts/install.sh
 	./scripts/install.sh
 
-# Install systemd service
+# Install systemd service (Linux only)
 install-service:
 	@echo "⚙️  Installing systemd service..."
 	sudo cp scripts/athan-clock.service /etc/systemd/system/
 	sudo systemctl daemon-reload
 	sudo systemctl enable athan-clock.service
 	@echo "✅ Service installed and enabled"
-	@echo "   Start with: sudo systemctl start athan-clock.service"
+	@echo "   Start: sudo systemctl start athan-clock.service"
 
-# Uninstall systemd service
+# Uninstall systemd service (Linux only)
 uninstall-service:
 	@echo "🗑️  Removing systemd service..."
-	sudo systemctl stop athan-clock.service || true
-	sudo systemctl disable athan-clock.service || true
+	sudo systemctl stop athan-clock.service 2>/dev/null || true
+	sudo systemctl disable athan-clock.service 2>/dev/null || true
 	sudo rm -f /etc/systemd/system/athan-clock.service
 	sudo systemctl daemon-reload
 	@echo "✅ Service removed"
 
-# Check service status
+# Check service status (Linux only)
 status:
 	@echo "📊 Service status:"
-	sudo systemctl status athan-clock.service || echo "Service not installed"
+	@sudo systemctl status athan-clock.service 2>/dev/null || echo "Service not installed or not Linux."
 
-# View service logs
+# View service logs (Linux only)
 logs:
-	@echo "📋 Service logs (press Ctrl+C to exit):"
+	@echo "📋 Service logs (Ctrl+C to exit):"
 	sudo journalctl -u athan-clock.service -f
 
-# Clean build artifacts
+# Clean build artifacts (keeps config dir, removes JSON)
 clean:
 	@echo "🧹 Cleaning..."
 	rm -rf node_modules
-	rm -rf config/*.json
-	@echo "✅ Clean complete"
+	@rm -f config/*.json 2>/dev/null || true
+	@echo "✅ Done"
 
-# Run tests (placeholder - add actual tests if needed)
+# Tests (placeholder)
 test:
 	@echo "🧪 Running tests..."
-	@echo "No tests configured yet"
+	npm run test 2>/dev/null || echo "No tests configured."

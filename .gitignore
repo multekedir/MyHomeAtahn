@@ -62,5 +62,4 @@ htmlcov/
 
 # Application specific
 config/settings.json
-assets/athan/*.mp3
-assets/sounds/*.mp3
+# MP3s are tracked so they can be in the repo (add makkah.mp3, etc. to assets/athan/)
