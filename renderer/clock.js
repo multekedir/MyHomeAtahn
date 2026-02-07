@@ -2,6 +2,9 @@ const { ipcRenderer } = require('electron');
 const path = require('path');
 const PrayerCalculator = require(path.join(__dirname, 'prayer.js'));
 const hijriConverter = require('hijri-converter');
+const { MASJID_ID, MASJID_DISPLAY_NAME } = require(path.join(__dirname, 'services', 'masjidConfig'));
+const { getMonthSchedule } = require(path.join(__dirname, 'services', 'masjidScheduleAgent'));
+const { getTodayPrayerTimes } = require(path.join(__dirname, 'services', 'prayerTimesResolver'));
 
 class AthanClock {
     constructor() {
@@ -13,7 +16,9 @@ class AthanClock {
         this.athanAudio = document.getElementById('athan-audio');
         this.notificationAudio = document.getElementById('notification-audio');
         this.settings = null;
-        
+        this.metMonth = null;
+        this.metToday = null;
+
         this.init();
     }
 
@@ -35,13 +40,45 @@ class AthanClock {
         
         // Update prayer times at midnight
         this.scheduleMidnightUpdate();
-        
+
+        // MET Mosque schedule (monthly cache); populates adhan/iqama in strip and header
+        this.loadMetSchedule();
+
         // Listen for settings updates
         ipcRenderer.on('settings-updated', (event, settings) => {
             this.settings = settings;
             this.calculator.settings = settings;
             this.updatePrayerTimes();
         });
+    }
+
+    async loadMetSchedule() {
+        try {
+            const month = await getMonthSchedule(MASJID_ID, new Date());
+            this.metMonth = month;
+            this.metToday = getTodayPrayerTimes(new Date(), month);
+            this.updateHeader();
+            this.updatePrayerTimes();
+        } catch (err) {
+            console.error('MET schedule load failed:', err);
+            this.metMonth = null;
+            this.metToday = null;
+            this.updateHeader();
+        }
+    }
+
+    updateHeader() {
+        const masjidEl = document.getElementById('masjid-name');
+        if (masjidEl) masjidEl.textContent = MASJID_DISPLAY_NAME;
+        const updatedEl = document.getElementById('last-updated');
+        if (!updatedEl) return;
+        if (this.metMonth && this.metMonth.monthKey) {
+            const [y, m] = this.metMonth.monthKey.split('-');
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            updatedEl.textContent = `Updated ${monthNames[parseInt(m, 10) - 1]} ${y}`;
+        } else {
+            updatedEl.textContent = 'Updated —';
+        }
     }
 
     updateClock() {
@@ -109,37 +146,53 @@ class AthanClock {
 
     updatePrayerTimes() {
         this.calculator.prayerTimes = this.calculator.calculatePrayerTimes();
-        
-        // Update prayer time displays (use timezone from settings; default Pacific)
+
         const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
         const timeFormat = this.settings?.display?.timeFormat || '12';
         const timeZone = this.settings?.location?.timezone || 'America/Los_Angeles';
-        
+
         prayers.forEach(prayer => {
-            const time = this.calculator.prayerTimes[prayer];
-            const timeString = this.formatTime(time, timeFormat === '24', timeZone, false);
-            document.getElementById(`${prayer}-time`).textContent = timeString;
+            const timeEl = document.getElementById(`${prayer}-time`);
+            const iqamaEl = document.getElementById(`${prayer}-iqama`);
+            if (this.metToday && this.metToday[prayer]) {
+                const adhan = this.metToday[prayer].adhan;
+                const iqama = this.metToday[prayer].iqama;
+                if (timeEl) timeEl.textContent = adhan || '—';
+                if (iqamaEl) iqamaEl.textContent = iqama ? `Iqama ${iqama}` : 'Iqama —';
+            } else {
+                const time = this.calculator.prayerTimes[prayer];
+                const timeString = this.formatTime(time, timeFormat === '24', timeZone, false);
+                if (timeEl) timeEl.textContent = timeString;
+                if (iqamaEl) iqamaEl.textContent = 'Iqama —';
+            }
         });
     }
 
     updateNextPrayer() {
         this.nextPrayer = this.calculator.getNextPrayer();
-        
+
+        // Hero line: "Next: Maghrib • 46 min"
+        const nextLineEl = document.getElementById('next-prayer-line');
+        if (nextLineEl) {
+            if (this.nextPrayer) {
+                const name = this.nextPrayer.name.charAt(0).toUpperCase() + this.nextPrayer.name.slice(1);
+                nextLineEl.textContent = `Next: ${name} • ${this.nextPrayer.countdown}`;
+                const warning = this.calculator.getPrayerWarning(this.nextPrayer);
+                nextLineEl.classList.remove('warning', 'urgent');
+                if (warning === 'urgent') nextLineEl.classList.add('urgent');
+                else if (warning === 'warning') nextLineEl.classList.add('warning');
+            } else {
+                nextLineEl.textContent = 'Next: — • —';
+                nextLineEl.classList.remove('warning', 'urgent');
+            }
+        }
+
         // Highlight only the next prayer cell (earthy-frame: single glow)
         const cells = document.querySelectorAll('.prayerCell');
         cells.forEach(cell => {
             const isNext = this.nextPrayer && cell.getAttribute('data-prayer') === this.nextPrayer.name;
             cell.classList.toggle('next', isNext);
         });
-        
-        const countdownEl = document.getElementById('next-prayer-countdown');
-        if (this.nextPrayer && countdownEl) {
-            countdownEl.textContent = this.nextPrayer.countdown;
-            const warning = this.calculator.getPrayerWarning(this.nextPrayer);
-            countdownEl.classList.remove('warning', 'urgent');
-            if (warning === 'urgent') countdownEl.classList.add('urgent');
-            else if (warning === 'warning') countdownEl.classList.add('warning');
-        }
     }
 
     updateCompletedPrayers() {
@@ -374,9 +427,11 @@ class AthanClock {
         
         setTimeout(() => {
             this.updatePrayerTimes();
+            this.loadMetSchedule(); // refresh MET today (and month if changed)
             // Schedule next midnight update
             setInterval(() => {
                 this.updatePrayerTimes();
+                this.loadMetSchedule();
             }, 24 * 60 * 60 * 1000); // 24 hours
         }, msUntilMidnight);
     }

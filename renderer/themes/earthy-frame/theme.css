@@ -59,6 +59,29 @@ body::after {
   pointer-events: none;
 }
 
+/* ——— Top zone: Header bar (masjid name + last updated) ——— */
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.masjid-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+.last-updated {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 /* Container — vertically center the whole block */
 .container {
   position: relative;
@@ -98,10 +121,30 @@ body::after {
   margin: 0;
 }
 
+/* Next prayer + countdown (second largest) */
+.next-prayer-line {
+  font-size: clamp(36px, 4.5vw, 48px);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.next-prayer-line .urgent { color: var(--accent); }
+.next-prayer-line .warning { color: #e8c547; }
+
+/* Islamic geometric divider (line + 8-point star) between time and date */
+.clock-divider {
+  display: block;
+  width: min(500px, 85vw);
+  height: auto;
+  margin: 14px auto 6px;
+  opacity: 0.9;
+}
+
 /* Date line: Gregorian • Hijri (English only) */
 #dateLine,
 .dateLine {
-  margin-top: 10px;
+  margin-top: 0;
   font-size: 28px;
   color: rgba(255, 255, 255, 0.65);
   font-weight: 400;
@@ -152,18 +195,27 @@ body::after {
 }
 
 .prayerCell .prayerName {
-  font-size: clamp(22px, 4vw, 32px);
+  font-size: clamp(16px, 2.5vw, 20px);
   color: var(--muted);
   font-weight: 500;
   display: block;
   white-space: nowrap;
 }
+.prayerCell .prayerAdhan,
 .prayerCell .prayerTime {
-  margin-top: 6px;
-  font-size: clamp(28px, 5vw, 44px);
+  margin-top: 4px;
+  font-size: clamp(32px, 5vw, 44px);
   font-variant-numeric: tabular-nums;
   color: var(--text);
   font-weight: 500;
+  display: block;
+  white-space: nowrap;
+}
+.prayerCell .prayerIqama {
+  margin-top: 2px;
+  font-size: clamp(16px, 2.2vw, 20px);
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
   display: block;
   white-space: nowrap;
 }

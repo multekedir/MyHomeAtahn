@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="600" height="8"
+     viewBox="0 0 600 8"
+     aria-hidden="true">
+
+  <line x1="0" y1="4" x2="600" y2="4"
+        stroke="white"
+        stroke-opacity="0.12"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+</svg>

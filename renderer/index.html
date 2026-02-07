@@ -17,11 +17,18 @@
         <span id="ramadan-day">Ramadan Day 15/30</span>
     </div>
 
+    <header class="header-bar" id="header-bar">
+        <span class="masjid-name" id="masjid-name">MET Mosque</span>
+        <span class="last-updated" id="last-updated">Updated Feb 2026</span>
+    </header>
+
     <div class="container">
         <div id="clock-display" class="clock-display">
-            <!-- Top zone: time + date line -->
+            <!-- Main zone: time + next prayer + date line -->
             <div class="top-block">
                 <div id="current-time" class="time">--:--:-- --</div>
+                <div class="next-prayer-line" id="next-prayer-line">Next: — • —</div>
+                <img src="themes/earthy-frame/divider.svg" alt="" class="clock-divider" width="500" height="8">
                 <div id="dateLine" class="dateLine">--</div>
             </div>
             <!-- Legacy date (hidden when dateLine is used) -->
@@ -35,27 +42,32 @@
             <div class="prayerBar" id="prayer-times">
                 <div class="prayerCell" data-prayer="fajr">
                     <span class="prayerName">Fajr</span>
-                    <span class="prayerTime" id="fajr-time">5:42 AM</span>
+                    <span class="prayerAdhan prayer-time" id="fajr-time">5:42 AM</span>
+                    <span class="prayerIqama" id="fajr-iqama">Iqama —</span>
                     <span class="prayer-checkmark hidden" id="fajr-check">✓</span>
                 </div>
                 <div class="prayerCell" data-prayer="dhuhr">
                     <span class="prayerName">Dhuhr</span>
-                    <span class="prayerTime" id="dhuhr-time">12:34 PM</span>
+                    <span class="prayerAdhan prayer-time" id="dhuhr-time">12:34 PM</span>
+                    <span class="prayerIqama" id="dhuhr-iqama">Iqama —</span>
                     <span class="prayer-checkmark hidden" id="dhuhr-check">✓</span>
                 </div>
                 <div class="prayerCell" data-prayer="asr">
                     <span class="prayerName">Asr</span>
-                    <span class="prayerTime" id="asr-time">3:45 PM</span>
+                    <span class="prayerAdhan prayer-time" id="asr-time">3:45 PM</span>
+                    <span class="prayerIqama" id="asr-iqama">Iqama —</span>
                     <span class="prayer-checkmark hidden" id="asr-check">✓</span>
                 </div>
                 <div class="prayerCell" data-prayer="maghrib">
                     <span class="prayerName">Maghrib</span>
-                    <span class="prayerTime" id="maghrib-time">6:12 PM</span>
+                    <span class="prayerAdhan prayer-time" id="maghrib-time">5:26 PM</span>
+                    <span class="prayerIqama" id="maghrib-iqama">Iqama 5:36</span>
                     <span class="prayer-checkmark hidden" id="maghrib-check">✓</span>
                 </div>
                 <div class="prayerCell" data-prayer="isha">
                     <span class="prayerName">Isha</span>
-                    <span class="prayerTime" id="isha-time">7:45 PM</span>
+                    <span class="prayerAdhan prayer-time" id="isha-time">6:49 PM</span>
+                    <span class="prayerIqama" id="isha-iqama">Iqama —</span>
                     <span class="prayer-checkmark hidden" id="isha-check">✓</span>
                 </div>
             </div>
