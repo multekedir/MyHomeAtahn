@@ -36,11 +36,9 @@ function populateForm(settings) {
     document.getElementById('maghrib-adjust').value = settings.timeAdjustments?.maghrib || 0;
     document.getElementById('isha-adjust').value = settings.timeAdjustments?.isha || 0;
 
-    // Athan settings
-    document.getElementById('default-athan').value = settings.athan?.default || 'makkah.mp3';
-    document.getElementById('fajr-athan').value = settings.athan?.fajr || 'makkah.mp3';
-    document.getElementById('athan-volume').value = settings.athan?.volume || 80;
-    document.getElementById('volume-display').textContent = `${settings.athan?.volume || 80}%`;
+    // Athan settings (volume only; athan/dua files are fixed)
+    document.getElementById('athan-volume').value = settings.athan?.volume ?? 80;
+    document.getElementById('volume-display').textContent = `${settings.athan?.volume ?? 80}%`;
 
     // Display settings
     document.getElementById('time-format').value = settings.display?.timeFormat || '12';
@@ -116,17 +114,14 @@ function setupEventListeners() {
         showMessage('Ramadan dates set (approximate). Please verify.', 'success');
     });
 
-    // Test athan
+    // Test athan (plays athan.mp3)
     document.getElementById('test-athan').addEventListener('click', () => {
-        const audioFile = document.getElementById('default-athan').value;
         const volume = document.getElementById('athan-volume').value / 100;
-        
-        // Use absolute path for settings page
-        const audio = new Audio(`http://localhost:3000/assets/athan/${audioFile}`);
+        const audio = new Audio('http://localhost:3000/assets/athan/athan.mp3');
         audio.volume = volume;
         audio.play().catch(error => {
             console.error('Error playing test audio:', error);
-            showMessage('Error playing test audio. Make sure audio files are in assets/athan/', 'error');
+            showMessage('Error playing test audio. Make sure assets/athan/athan.mp3 exists.', 'error');
         });
     });
 
@@ -154,8 +149,6 @@ async function saveSettings() {
             isha: parseInt(document.getElementById('isha-adjust').value) || 0
         },
         athan: {
-            default: document.getElementById('default-athan').value,
-            fajr: document.getElementById('fajr-athan').value,
             volume: parseInt(document.getElementById('athan-volume').value)
         },
         display: {

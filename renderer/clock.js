@@ -50,6 +50,14 @@ class AthanClock {
             this.calculator.settings = settings;
             this.updatePrayerTimes();
         });
+
+        // Shortcut to trigger athan for testing: Ctrl+Shift+A (Windows/Linux) or Cmd+Shift+A (Mac)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                this.playAthan('dhuhr');
+            }
+        });
     }
 
     async loadMetSchedule() {
@@ -197,16 +205,7 @@ class AthanClock {
 
     updateCompletedPrayers() {
         this.completedPrayers = this.calculator.getCompletedPrayers();
-        
-        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-        prayers.forEach(prayer => {
-            const checkmark = document.getElementById(`${prayer}-check`);
-            if (this.completedPrayers.includes(prayer)) {
-                checkmark.classList.remove('hidden');
-            } else {
-                checkmark.classList.add('hidden');
-            }
-        });
+        // Checkmarks removed from UI
     }
 
     updateDates() {
@@ -336,45 +335,41 @@ class AthanClock {
         const timeString = this.formatTime(this.currentTime, timeFormat === '24', timeZone);
         document.getElementById('athan-time').textContent = timeString;
         
-        // Determine which audio file to play
-        let audioFile = this.settings?.athan?.default || 'makkah.mp3';
-        if (prayerName === 'fajr' && this.settings?.athan?.fajr) {
-            audioFile = this.settings.athan.fajr;
-        }
-        
-        // Load and play audio
+        // Fixed files: athan.mp3 (fajr: fajir.mp3), then dua.mp3
+        const athanFile = prayerName === 'fajr' ? 'fajir.mp3' : 'athan.mp3';
         const path = require('path');
         const appPath = window.__APP_PATH__ || __dirname.replace('/renderer', '');
-        const audioPath = path.join(appPath, 'assets', 'athan', audioFile);
-        // Normalize path for different OS
-        const normalizedPath = audioPath.replace(/\\/g, '/');
-        this.athanAudio.src = `file:///${normalizedPath}`;
-        this.athanAudio.volume = (this.settings?.athan?.volume || 80) / 100;
-        
-        // Fade in
-        this.athanAudio.volume = 0;
-        await this.athanAudio.play();
-        
-        // Fade in over 2 seconds
-        const fadeInterval = setInterval(() => {
-            if (this.athanAudio.volume < (this.settings?.athan?.volume || 80) / 100) {
-                this.athanAudio.volume = Math.min(
-                    this.athanAudio.volume + 0.05,
-                    (this.settings?.athan?.volume || 80) / 100
-                );
-            } else {
-                clearInterval(fadeInterval);
-            }
-        }, 100);
-        
-        // Wait for audio to finish (or 3 minutes max)
-        await Promise.race([
-            new Promise(resolve => {
+        const volume = (this.settings?.athan?.volume ?? 80) / 100;
+
+        const playOne = (filename) => {
+            const audioPath = path.join(appPath, 'assets', 'athan', filename);
+            const normalizedPath = audioPath.replace(/\\/g, '/');
+            this.athanAudio.src = `file:///${normalizedPath}`;
+            this.athanAudio.volume = volume;
+            return new Promise((resolve, reject) => {
                 this.athanAudio.onended = resolve;
-            }),
-            this.sleep(180000) // 3 minutes max
-        ]);
-        
+                this.athanAudio.onerror = reject;
+                this.athanAudio.volume = 0;
+                this.athanAudio.play().then(() => {
+                    const fadeInterval = setInterval(() => {
+                        if (this.athanAudio.volume < volume) {
+                            this.athanAudio.volume = Math.min(this.athanAudio.volume + 0.05, volume);
+                        } else {
+                            clearInterval(fadeInterval);
+                        }
+                    }, 100);
+                }).catch(reject);
+            });
+        };
+
+        // Play athan, then dua (each max 3 min)
+        await Promise.race([ playOne(athanFile), this.sleep(180000) ]);
+        try {
+            await Promise.race([ playOne('dua.mp3'), this.sleep(180000) ]);
+        } catch (e) {
+            console.warn('Dua playback skipped:', e);
+        }
+
         // Return to clock display
         athanDisplay.classList.add('hidden');
         clockDisplay.classList.remove('hidden');

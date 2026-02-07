@@ -87,24 +87,7 @@
                 <!-- Athan Audio Settings -->
                 <section class="settings-section">
                     <h2>🔊 Athan Audio Settings</h2>
-                    <div class="form-group">
-                        <label for="default-athan">Default Athan</label>
-                        <select id="default-athan" name="defaultAthan">
-                            <option value="makkah.mp3">Makkah</option>
-                            <option value="madinah.mp3">Madinah</option>
-                            <option value="mishary.mp3">Mishary</option>
-                            <option value="abdulbasit.mp3">Abdul Basit</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="fajr-athan">Fajr Athan (Optional)</label>
-                        <select id="fajr-athan" name="fajrAthan">
-                            <option value="makkah.mp3">Makkah</option>
-                            <option value="madinah.mp3">Madinah</option>
-                            <option value="mishary.mp3">Mishary</option>
-                            <option value="abdulbasit.mp3">Abdul Basit</option>
-                        </select>
-                    </div>
+                    <p class="form-hint">Uses <code>athan.mp3</code> (Fajr: <code>fajir.mp3</code>), then <code>dua.mp3</code> from <code>assets/athan/</code>.</p>
                     <div class="form-group">
                         <label for="athan-volume">Volume (%)</label>
                         <input type="range" id="athan-volume" name="athanVolume" min="0" max="100" value="80">
