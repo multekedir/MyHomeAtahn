@@ -251,3 +251,39 @@ body::after {
 .next-prayer-countdown.urgent {
   color: #d2a85a;
 }
+
+/* Ramadan Countdown (2 weeks before) */
+.ramadan-countdown {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+
+  padding: 16px 40px;
+  background: rgba(210, 168, 90, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(210, 168, 90, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--brass);
+  text-align: center;
+
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.ramadan-countdown.hidden {
+  display: none;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(210, 168, 90, 0.2);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(210, 168, 90, 0.4);
+  }
+}

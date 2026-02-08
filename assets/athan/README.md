@@ -4,7 +4,11 @@ Place your athan MP3 files in this directory.
 
 ## Required Files
 
-- `makkah.mp3` - Default athan (Makkah)
+- `athan.mp3` - Main athan (Dhuhr, Asr, Maghrib, Isha)
+- `fajir.mp3` - Fajr athan
+- `dua.mp3` - Dua played after athan
+- `chime.mp3` - Optional soft chime for Ramadan overlay (Maghrib/Taraweeh at-time)
+- `makkah.mp3` - Legacy default (Makkah)
 - `madinah.mp3` - Madinah athan
 - `mishary.mp3` - Mishary Rashid Alafasy athan
 - `abdulbasit.mp3` - Abdul Basit Abdul Samad athan

@@ -1,0 +1,23 @@
+{
+  "maghrib": [
+    {
+      "id": "iftar_1",
+      "arabic": "اللهم لك صمت وعلى رزقك أفطرت",
+      "transliteration": "Allahumma laka sumtu wa 'ala rizqika aftartu"
+    }
+  ],
+  "fajr": [
+    {
+      "id": "morning_1",
+      "arabic": "اللهم بك أصبحنا وبك أمسينا",
+      "transliteration": "Allahumma bika asbahna wa bika amsayna"
+    }
+  ],
+  "taraweeh": [
+    {
+      "id": "taraweeh_1",
+      "arabic": "نويت صلاة التراويح لله تعالى",
+      "transliteration": "Nawaytu salat at-taraweeh lillahi ta'ala"
+    }
+  ]
+}

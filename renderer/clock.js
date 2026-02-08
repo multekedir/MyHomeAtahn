@@ -5,6 +5,11 @@ const hijriConverter = require('hijri-converter');
 const { MASJID_ID, MASJID_DISPLAY_NAME } = require(path.join(__dirname, 'services', 'masjidConfig'));
 const { getMonthSchedule } = require(path.join(__dirname, 'services', 'masjidScheduleAgent'));
 const { getTodayPrayerTimes } = require(path.join(__dirname, 'services', 'prayerTimesResolver'));
+const { getTodayRamadanTimes } = require(path.join(__dirname, 'services', 'ramadanEventTimes'));
+const { computeOverlayState } = require(path.join(__dirname, 'services', 'ramadanOverlayAgent'));
+const { getDateKey } = require(path.join(__dirname, 'services', 'monthKey'));
+const { loadDuas } = require(path.join(__dirname, 'services', 'duaSelector'));
+const RamadanOverlay = require(path.join(__dirname, 'overlays', 'ramadanOverlay.js'));
 
 class AthanClock {
     constructor() {
@@ -18,6 +23,11 @@ class AthanClock {
         this.settings = null;
         this.metMonth = null;
         this.metToday = null;
+        /** When > Date.now(), Ramadan overlay uses fake times for testing. Event: 'maghrib' | 'fajr' | 'taraweeh' */
+        this.ramadanOverlayTestUntil = 0;
+        this.ramadanOverlayTestEvent = 'maghrib';
+        /** Fixed target times for test countdown (set when shortcut pressed so countdown actually decreases) */
+        this.ramadanOverlayTestTargets = null;
 
         this.init();
     }
@@ -49,6 +59,7 @@ class AthanClock {
             this.settings = settings;
             this.calculator.settings = settings;
             this.updatePrayerTimes();
+            if (settings?.ramadan?.enabled) loadDuas().catch(() => {});
         });
 
         // Shortcut to trigger athan for testing: Ctrl+Shift+A (Windows/Linux) or Cmd+Shift+A (Mac)
@@ -57,7 +68,79 @@ class AthanClock {
                 e.preventDefault();
                 this.playAthan('dhuhr');
             }
+            // Ramadan overlay test shortcuts (10 min window each; simulates event in 30s then at-time)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                const key = e.key.toLowerCase();
+                if (key === 'r') {
+                    e.preventDefault();
+                    const now = Date.now();
+                    this.ramadanOverlayTestUntil = now + 10 * 60 * 1000;
+                    this.ramadanOverlayTestEvent = 'maghrib';
+                    this.ramadanOverlayTestTargets = {
+                        maghribAdhan: new Date(now + 30 * 1000),
+                        fajrAdhan: new Date(now + 60 * 60 * 1000),
+                        ishaIqama: new Date(now + 60 * 60 * 1000)
+                    };
+                    loadDuas().catch(() => {});
+                } else if (key === 'f') {
+                    e.preventDefault();
+                    const now = Date.now();
+                    this.ramadanOverlayTestUntil = now + 10 * 60 * 1000;
+                    this.ramadanOverlayTestEvent = 'fajr';
+                    this.ramadanOverlayTestTargets = {
+                        maghribAdhan: new Date(now - 60 * 60 * 1000),
+                        fajrAdhan: new Date(now + 30 * 1000),
+                        ishaIqama: new Date(now + 60 * 60 * 1000)
+                    };
+                    loadDuas().catch(() => {});
+                } else if (key === 't') {
+                    e.preventDefault();
+                    const now = Date.now();
+                    this.ramadanOverlayTestUntil = now + 10 * 60 * 1000;
+                    this.ramadanOverlayTestEvent = 'taraweeh';
+                    this.ramadanOverlayTestTargets = {
+                        maghribAdhan: new Date(now - 60 * 60 * 1000),
+                        fajrAdhan: new Date(now + 60 * 60 * 1000),
+                        ishaIqama: new Date(now + 30 * 1000)
+                    };
+                    loadDuas().catch(() => {});
+                }
+            }
         });
+
+        // Ramadan overlay: countdown + at-time (Maghrib, Fajr, Taraweeh); refresh every second
+        setInterval(() => this.tickRamadanOverlay(), 1000);
+        // When user taps to dismiss overlay, end test mode so it doesn't keep reopening
+        document.body.addEventListener('ramadan-overlay-dismissed', () => {
+            this.ramadanOverlayTestUntil = 0;
+            this.ramadanOverlayTestTargets = null;
+        });
+        // Preload duos so overlay can show them when at-time screen appears
+        await loadDuas().catch(() => {});
+    }
+
+    tickRamadanOverlay() {
+        const now = new Date();
+        let times;
+
+        if (this.ramadanOverlayTestUntil > now && this.ramadanOverlayTestTargets) {
+            // Test mode: use fixed targets set when shortcut was pressed so countdown decreases each second
+            times = this.ramadanOverlayTestTargets;
+        } else if (!this.settings?.ramadan?.enabled || !this.calculator.isRamadanMode()) {
+            this.ramadanOverlayTestTargets = null;
+            RamadanOverlay.update({ state: 'NONE' });
+            return;
+        } else {
+            times = getTodayRamadanTimes(this.calculator, this.metToday);
+        }
+
+        const lead = this.settings?.ramadan?.countdownLeadMinutes || {};
+        const stateResult = computeOverlayState(now, times, {
+            maghribLeadMin: lead.maghrib,
+            fajrLeadMin: lead.fajr,
+            taraweehLeadMin: lead.taraweeh
+        });
+        RamadanOverlay.update(stateResult, getDateKey(now));
     }
 
     async loadMetSchedule() {
@@ -107,7 +190,25 @@ class AthanClock {
         if (this.calculator.prayerTimes) {
             this.updateNextPrayer();
             this.updateCompletedPrayers();
-            this.updateRamadanDisplay();
+        }
+
+        this.updateRamadanCountdown();
+    }
+
+    updateRamadanCountdown() {
+        const countdownEl = document.getElementById('ramadan-countdown');
+        const countdownTextEl = document.getElementById('ramadan-countdown-text');
+        if (!countdownEl || !countdownTextEl) return;
+        const daysUntil = this.calculator.getDaysUntilRamadan();
+        if (daysUntil > 0 && daysUntil <= 14) {
+            countdownEl.classList.remove('hidden');
+            if (daysUntil === 1) {
+                countdownTextEl.textContent = '🌙 Ramadan begins tomorrow!';
+            } else {
+                countdownTextEl.textContent = `🌙 Ramadan begins in ${daysUntil} days`;
+            }
+        } else {
+            countdownEl.classList.add('hidden');
         }
     }
 
@@ -239,34 +340,6 @@ class AthanClock {
         }
     }
 
-    updateRamadanDisplay() {
-        const isRamadan = this.calculator.isRamadanMode();
-        const banner = document.getElementById('ramadan-banner');
-        
-        if (isRamadan) {
-            const day = this.calculator.getRamadanDay();
-            if (day) {
-                document.getElementById('ramadan-day').textContent = `Ramadan Day ${day}/30`;
-                banner.classList.remove('hidden');
-            }
-            
-            // Update prayer labels for Ramadan
-            const fajrLabel = document.querySelector('[data-prayer="fajr"] .prayerName');
-            const maghribLabel = document.querySelector('[data-prayer="maghrib"] .prayerName');
-            
-            if (fajrLabel) {
-                fajrLabel.classList.add('ramadan-label');
-            }
-            if (maghribLabel) {
-                maghribLabel.classList.add('ramadan-label');
-            }
-        } else {
-            banner.classList.add('hidden');
-            const labels = document.querySelectorAll('.ramadan-label');
-            labels.forEach(label => label.classList.remove('ramadan-label'));
-        }
-    }
-
     checkPrayerTimes() {
         try {
             if (this.isAthanPlaying) return;
@@ -285,19 +358,7 @@ class AthanClock {
             if (this.nextPrayer) {
                 const warning = this.calculator.getPrayerWarning(this.nextPrayer);
                 if (warning === 'warning' && !this.isAthanPlaying) {
-                    // Play subtle notification at 10 minutes
                     this.playNotification();
-                }
-            }
-            
-            // Check for Suhoor warning (Ramadan mode, 30 min before Fajr)
-            if (this.calculator.isRamadanMode() && this.nextPrayer && this.nextPrayer.name === 'fajr') {
-                const now = new Date();
-                const timeUntil = this.nextPrayer.time.getTime() - now.getTime();
-                const minutesUntil = Math.floor(timeUntil / 60000);
-                
-                if (minutesUntil <= 30 && minutesUntil > 0) {
-                    this.showSuhoorWarning(minutesUntil);
                 }
             }
         } catch (error) {
@@ -313,17 +374,9 @@ class AthanClock {
         // Show athan display
         const clockDisplay = document.getElementById('clock-display');
         const athanDisplay = document.getElementById('athan-display');
-        const iftarDisplay = document.getElementById('iftar-display');
         
         clockDisplay.classList.add('hidden');
-        iftarDisplay.classList.add('hidden');
         athanDisplay.classList.remove('hidden');
-        
-        // Special handling for Maghrib in Ramadan
-        if (this.calculator.isRamadanMode() && prayerName === 'maghrib') {
-            this.showIftarDua();
-            await this.sleep(30000); // 30 seconds
-        }
         
         // Set prayer name
         const prayerNameUpper = prayerName.toUpperCase();
@@ -362,40 +415,20 @@ class AthanClock {
             });
         };
 
-        // Play athan, then dua (each max 3 min)
+        // Play athan, then dua if enabled (each max 3 min)
         await Promise.race([ playOne(athanFile), this.sleep(180000) ]);
-        try {
-            await Promise.race([ playOne('dua.mp3'), this.sleep(180000) ]);
-        } catch (e) {
-            console.warn('Dua playback skipped:', e);
+        if (this.settings?.athan?.playDuaAfter !== false) {
+            try {
+                await Promise.race([ playOne('dua.mp3'), this.sleep(180000) ]);
+            } catch (e) {
+                console.warn('Dua playback skipped:', e);
+            }
         }
 
         // Return to clock display
         athanDisplay.classList.add('hidden');
         clockDisplay.classList.remove('hidden');
         this.isAthanPlaying = false;
-    }
-
-    showIftarDua() {
-        const iftarDisplay = document.getElementById('iftar-display');
-        iftarDisplay.classList.remove('hidden');
-    }
-
-    showSuhoorWarning(minutesUntil) {
-        // Create or update suhoor warning element
-        let warningEl = document.getElementById('suhoor-warning');
-        if (!warningEl) {
-            warningEl = document.createElement('div');
-            warningEl.id = 'suhoor-warning';
-            warningEl.className = 'suhoor-warning';
-            document.body.appendChild(warningEl);
-        }
-        warningEl.textContent = `Suhoor ends in ${minutesUntil} minutes`;
-        
-        // Play warning sound at specific intervals
-        if (minutesUntil === 15 || minutesUntil === 10 || minutesUntil === 5) {
-            this.playNotification();
-        }
     }
 
     async playNotification() {

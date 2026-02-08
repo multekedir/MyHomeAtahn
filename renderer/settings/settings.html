@@ -89,6 +89,12 @@
                     <h2>🔊 Athan Audio Settings</h2>
                     <p class="form-hint">Uses <code>athan.mp3</code> (Fajr: <code>fajir.mp3</code>), then <code>dua.mp3</code> from <code>assets/athan/</code>.</p>
                     <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="athan-play-dua-after" name="athanPlayDuaAfter" checked>
+                            <span>Play dua after athan</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
                         <label for="athan-volume">Volume (%)</label>
                         <input type="range" id="athan-volume" name="athanVolume" min="0" max="100" value="80">
                         <span id="volume-display">80%</span>
@@ -154,6 +160,21 @@
                         </div>
                         <div class="form-group">
                             <button type="button" id="auto-detect-ramadan" class="btn btn-secondary">Auto-detect Ramadan Dates</button>
+                        </div>
+                        <p class="form-hint" style="margin-top: 1rem;">Countdown overlay starts this many minutes before:</p>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ramadan-lead-maghrib">Maghrib Adhan (min)</label>
+                                <input type="number" id="ramadan-lead-maghrib" name="ramadanLeadMaghrib" min="1" max="60" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="ramadan-lead-fajr">Fajr Adhan (min)</label>
+                                <input type="number" id="ramadan-lead-fajr" name="ramadanLeadFajr" min="1" max="60" value="15">
+                            </div>
+                            <div class="form-group">
+                                <label for="ramadan-lead-taraweeh">Taraweeh / Isha Iqama (min)</label>
+                                <input type="number" id="ramadan-lead-taraweeh" name="ramadanLeadTaraweeh" min="1" max="60" value="10">
+                            </div>
                         </div>
                     </div>
                 </section>

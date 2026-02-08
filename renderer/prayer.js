@@ -1,4 +1,5 @@
 const { PrayerTimes, Coordinates, CalculationMethod, CalculationParameters } = require('adhan');
+const hijriConverter = require('hijri-converter');
 
 class PrayerCalculator {
     constructor() {
@@ -136,15 +137,9 @@ class PrayerCalculator {
 
     formatCountdown(milliseconds) {
         const totalSeconds = Math.floor(milliseconds / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
-
-        if (hours > 0) {
-            return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        } else {
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
     formatTime(date, format24 = false) {
@@ -221,34 +216,82 @@ class PrayerCalculator {
         return null;
     }
 
-    // Check if Ramadan mode is active
+    // Auto-detect if today is in Ramadan using Hijri calendar
+    autoDetectRamadan() {
+        const today = new Date();
+        const hijri = hijriConverter.toHijri(
+            today.getFullYear(),
+            today.getMonth() + 1,
+            today.getDate()
+        );
+        if (hijri.hm === 9) {
+            const ramadanStart = hijriConverter.toGregorian(hijri.hy, 9, 1);
+            const startDate = new Date(ramadanStart.gy, ramadanStart.gm - 1, ramadanStart.gd);
+            const ramadanEnd = hijriConverter.toGregorian(hijri.hy, 9, 30);
+            const endDate = new Date(ramadanEnd.gy, ramadanEnd.gm - 1, ramadanEnd.gd);
+            return {
+                isRamadan: true,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                currentDay: hijri.hd
+            };
+        }
+        return {
+            isRamadan: false,
+            startDate: null,
+            endDate: null,
+            currentDay: null
+        };
+    }
+
+    // Get days until next Ramadan
+    getDaysUntilRamadan() {
+        const today = new Date();
+        const hijri = hijriConverter.toHijri(
+            today.getFullYear(),
+            today.getMonth() + 1,
+            today.getDate()
+        );
+        if (hijri.hm === 9) {
+            return 0;
+        }
+        let ramadanYear = hijri.hy;
+        if (hijri.hm > 9) {
+            ramadanYear = hijri.hy + 1;
+        }
+        const nextRamadan = hijriConverter.toGregorian(ramadanYear, 9, 1);
+        const ramadanDate = new Date(nextRamadan.gy, nextRamadan.gm - 1, nextRamadan.gd);
+        const diffTime = ramadanDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+
+    // Check if Ramadan mode is active (manual dates or auto-detect)
     isRamadanMode() {
-        if (!this.settings || !this.settings.ramadan || !this.settings.ramadan.enabled) {
-            return false;
+        if (this.settings?.ramadan?.enabled) {
+            const now = new Date();
+            const startDate = this.settings.ramadan.startDate ? new Date(this.settings.ramadan.startDate) : null;
+            const endDate = this.settings.ramadan.endDate ? new Date(this.settings.ramadan.endDate) : null;
+            if (startDate && endDate && now >= startDate && now <= endDate) {
+                return true;
+            }
         }
-        
-        const now = new Date();
-        const startDate = this.settings.ramadan.startDate ? new Date(this.settings.ramadan.startDate) : null;
-        const endDate = this.settings.ramadan.endDate ? new Date(this.settings.ramadan.endDate) : null;
-        
-        if (!startDate || !endDate) {
-            // Auto-detect Ramadan (simplified - would need proper Hijri calendar)
-            return false;
-        }
-        
-        return now >= startDate && now <= endDate;
+        const autoDetect = this.autoDetectRamadan();
+        return autoDetect.isRamadan;
     }
 
     getRamadanDay() {
-        if (!this.isRamadanMode() || !this.settings.ramadan.startDate) {
+        const autoDetect = this.autoDetectRamadan();
+        if (autoDetect.isRamadan) {
+            return autoDetect.currentDay;
+        }
+        if (!this.settings?.ramadan?.enabled || !this.settings.ramadan.startDate) {
             return null;
         }
-        
         const now = new Date();
         const startDate = new Date(this.settings.ramadan.startDate);
         const diffTime = now.getTime() - startDate.getTime();
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        
         return diffDays;
     }
 }

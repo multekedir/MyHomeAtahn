@@ -36,9 +36,10 @@ function populateForm(settings) {
     document.getElementById('maghrib-adjust').value = settings.timeAdjustments?.maghrib || 0;
     document.getElementById('isha-adjust').value = settings.timeAdjustments?.isha || 0;
 
-    // Athan settings (volume only; athan/dua files are fixed)
+    // Athan settings
     document.getElementById('athan-volume').value = settings.athan?.volume ?? 80;
     document.getElementById('volume-display').textContent = `${settings.athan?.volume ?? 80}%`;
+    document.getElementById('athan-play-dua-after').checked = settings.athan?.playDuaAfter !== false;
 
     // Display settings
     document.getElementById('time-format').value = settings.display?.timeFormat || '12';
@@ -58,6 +59,10 @@ function populateForm(settings) {
         if (settings.ramadan.endDate) {
             document.getElementById('ramadan-end').value = settings.ramadan.endDate.split('T')[0];
         }
+        const lead = settings.ramadan?.countdownLeadMinutes || {};
+        document.getElementById('ramadan-lead-maghrib').value = lead.maghrib ?? 5;
+        document.getElementById('ramadan-lead-fajr').value = lead.fajr ?? 15;
+        document.getElementById('ramadan-lead-taraweeh').value = lead.taraweeh ?? 10;
     }
 }
 
@@ -100,18 +105,34 @@ function setupEventListeners() {
         }
     });
 
-    // Auto-detect Ramadan
+    // Auto-detect Ramadan using Hijri calendar
     document.getElementById('auto-detect-ramadan').addEventListener('click', () => {
-        // Simplified - in production, use proper Hijri calendar
-        const currentYear = new Date().getFullYear();
-        // Approximate Ramadan dates (would need proper calculation)
-        const ramadanStart = new Date(currentYear, 2, 1); // March 1st (example)
-        const ramadanEnd = new Date(currentYear, 2, 30); // March 30th (example)
-        
-        document.getElementById('ramadan-start').value = ramadanStart.toISOString().split('T')[0];
-        document.getElementById('ramadan-end').value = ramadanEnd.toISOString().split('T')[0];
-        
-        showMessage('Ramadan dates set (approximate). Please verify.', 'success');
+        try {
+            const hijriConverter = require('hijri-converter');
+            const today = new Date();
+            const hijri = hijriConverter.toHijri(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            if (hijri.hm === 9) {
+                const ramadanStart = hijriConverter.toGregorian(hijri.hy, 9, 1);
+                const ramadanEnd = hijriConverter.toGregorian(hijri.hy, 9, 30);
+                const startDate = new Date(ramadanStart.gy, ramadanStart.gm - 1, ramadanStart.gd);
+                const endDate = new Date(ramadanEnd.gy, ramadanEnd.gm - 1, ramadanEnd.gd);
+                document.getElementById('ramadan-start').value = startDate.toISOString().split('T')[0];
+                document.getElementById('ramadan-end').value = endDate.toISOString().split('T')[0];
+                document.getElementById('ramadan-enabled').checked = true;
+                document.getElementById('ramadan-dates').classList.remove('hidden');
+                showMessage(`Ramadan detected! Currently day ${hijri.hd} of Ramadan ${hijri.hy} AH`, 'success');
+            } else {
+                const monthNames = [
+                    'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani',
+                    'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban",
+                    'Ramadan', 'Shawwal', 'Dhul-Qadah', 'Dhul-Hijjah'
+                ];
+                showMessage(`Not currently Ramadan. Today is ${hijri.hd} ${monthNames[hijri.hm - 1]} ${hijri.hy} AH`, 'error');
+            }
+        } catch (e) {
+            console.error('Auto-detect Ramadan:', e);
+            showMessage('Auto-detect failed. Set dates manually or open settings from the app.', 'error');
+        }
     });
 
     // Test athan (plays athan.mp3)
@@ -149,7 +170,8 @@ async function saveSettings() {
             isha: parseInt(document.getElementById('isha-adjust').value) || 0
         },
         athan: {
-            volume: parseInt(document.getElementById('athan-volume').value)
+            volume: parseInt(document.getElementById('athan-volume').value),
+            playDuaAfter: document.getElementById('athan-play-dua-after').checked
         },
         display: {
             timeFormat: document.getElementById('time-format').value,
@@ -161,7 +183,12 @@ async function saveSettings() {
         ramadan: {
             enabled: document.getElementById('ramadan-enabled').checked,
             startDate: document.getElementById('ramadan-start').value || null,
-            endDate: document.getElementById('ramadan-end').value || null
+            endDate: document.getElementById('ramadan-end').value || null,
+            countdownLeadMinutes: {
+                maghrib: parseInt(document.getElementById('ramadan-lead-maghrib').value, 10) || 5,
+                fajr: parseInt(document.getElementById('ramadan-lead-fajr').value, 10) || 15,
+                taraweeh: parseInt(document.getElementById('ramadan-lead-taraweeh').value, 10) || 10
+            }
         }
     };
 

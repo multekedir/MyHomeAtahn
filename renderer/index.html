@@ -9,13 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes/earthy-frame/theme.css">
+    <link rel="stylesheet" href="overlays/ramadanOverlay.css">
 </head>
 <body>
     <div class="pattern" aria-hidden="true"></div>
-
-    <div id="ramadan-banner" class="ramadan-banner hidden">
-        <span id="ramadan-day">Ramadan Day 15/30</span>
-    </div>
 
     <header class="header-bar" id="header-bar">
         <span class="masjid-name" id="masjid-name">MET Mosque</span>
@@ -75,9 +72,22 @@
             <div class="athan-animation"></div>
         </div>
 
-        <div id="iftar-display" class="iftar-display hidden">
-            <div class="iftar-dua-arabic">اللهم لك صمت وعلى رزقك أفطرت</div>
-            <div class="iftar-dua-english">Allahumma laka sumtu wa 'ala rizqika aftartu</div>
+        <!-- Ramadan Countdown (shows 2 weeks before Ramadan) -->
+        <div id="ramadan-countdown" class="ramadan-countdown hidden">
+            <span id="ramadan-countdown-text">Ramadan begins in 14 days</span>
+        </div>
+
+    </div>
+
+    <div id="ramadan-overlay" class="ramadan-overlay hidden">
+        <div class="overlay-card">
+            <h1 id="overlay-title"></h1>
+            <div id="overlay-main">
+                <span id="overlay-countdown"></span>
+                <div id="overlay-dua"></div>
+            </div>
+            <p id="overlay-subtitle"></p>
+            <p class="hint">Tap anywhere to dismiss</p>
         </div>
     </div>
 

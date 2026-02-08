@@ -32,9 +32,8 @@ const defaultSettings = {
     isha: 0
   },
   athan: {
-    default: 'makkah.mp3',
-    fajr: 'makkah.mp3',
-    volume: 80
+    volume: 80,
+    playDuaAfter: true
   },
   display: {
     timeFormat: '12',
@@ -46,7 +45,8 @@ const defaultSettings = {
   ramadan: {
     enabled: false,
     startDate: null,
-    endDate: null
+    endDate: null,
+    countdownLeadMinutes: { maghrib: 5, fajr: 15, taraweeh: 10 }
   }
 };
 
@@ -133,12 +133,14 @@ function createWindow() {
     backgroundColor: '#1a1a1a'
   });
 
-  // Make app path available globally
-  mainWindow.webContents.executeJavaScript(`
-    window.__APP_PATH__ = ${JSON.stringify(__dirname)};
-  `);
-
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+
+  // Set app path after page loads so renderer can find assets
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.executeJavaScript(`
+      window.__APP_PATH__ = ${JSON.stringify(__dirname)};
+    `);
+  });
 
   // Prevent window from closing
   mainWindow.on('close', (event) => {
