@@ -41,6 +41,8 @@ class AthanClock {
         await this.calculator.loadSettings();
         this.settings = this.calculator.settings;
 
+        this.applyTheme(this.settings);
+
         // Recalculate with settings (timezone, location for prayer times)
         this.updatePrayerTimes();
         this.updateClock();
@@ -58,6 +60,7 @@ class AthanClock {
         ipcRenderer.on('settings-updated', (event, settings) => {
             this.settings = settings;
             this.calculator.settings = settings;
+            this.applyTheme(settings);
             this.updatePrayerTimes();
             if (settings?.ramadan?.enabled) loadDuas().catch(() => {});
         });
@@ -141,6 +144,14 @@ class AthanClock {
             taraweehLeadMin: lead.taraweeh
         });
         RamadanOverlay.update(stateResult, getDateKey(now));
+    }
+
+    applyTheme(settings) {
+        const theme = settings?.display?.theme || 'earthy-frame';
+        const link = document.getElementById('theme-link');
+        if (link) {
+            link.href = `themes/${theme}/theme.css`;
+        }
     }
 
     async loadMetSchedule() {

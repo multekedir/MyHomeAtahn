@@ -36,6 +36,7 @@ const defaultSettings = {
     playDuaAfter: true
   },
   display: {
+    theme: 'earthy-frame',
     timeFormat: '12',
     brightness: 100,
     nightModeStart: 22,

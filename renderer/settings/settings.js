@@ -42,6 +42,7 @@ function populateForm(settings) {
     document.getElementById('athan-play-dua-after').checked = settings.athan?.playDuaAfter !== false;
 
     // Display settings
+    document.getElementById('display-theme').value = settings.display?.theme || 'earthy-frame';
     document.getElementById('time-format').value = settings.display?.timeFormat || '12';
     document.getElementById('brightness').value = settings.display?.brightness || 100;
     document.getElementById('brightness-display').textContent = `${settings.display?.brightness || 100}%`;
@@ -174,6 +175,7 @@ async function saveSettings() {
             playDuaAfter: document.getElementById('athan-play-dua-after').checked
         },
         display: {
+            theme: document.getElementById('display-theme').value,
             timeFormat: document.getElementById('time-format').value,
             brightness: parseInt(document.getElementById('brightness').value),
             nightModeStart: parseInt(document.getElementById('night-mode-start').value),
