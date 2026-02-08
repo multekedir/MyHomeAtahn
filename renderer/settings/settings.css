@@ -1,29 +1,72 @@
+/* Earthy Frame theme for Settings — matches main clock (bright room) */
+:root {
+  --bg-olive: #1a2a22;
+  --bg-earth: #3d3528;
+  --text: rgba(255, 255, 255, 1);
+  --muted: rgba(255, 255, 255, 0.88);
+  --glass: rgba(30, 30, 28, 0.6);
+  --border: rgba(255, 255, 255, 0.18);
+  --brass: #e4b85e;
+  --radius: 16px;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+body.theme-earthy {
+    font-family: "Manrope", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     min-height: 100vh;
     padding: 20px;
-    color: #333;
+    color: var(--text);
+    background:
+        radial-gradient(900px 600px at 70% 85%, rgba(210, 168, 90, 0.18), transparent 60%),
+        linear-gradient(140deg, var(--bg-olive), var(--bg-earth));
+    position: relative;
+}
+
+body.theme-earthy::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.2));
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Pattern overlay (same as main theme) */
+body.theme-earthy .pattern {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cdefs%3E%3Cg id='s' transform='translate(130,130)'%3E%3Cpath d='M100 0 L37 37 L0 100 L-37 37 L-100 0 L-37 -37 L0 -100 L37 -37 Z' fill='none' stroke='rgba(255,255,255,0.72)' stroke-width='4'/%3E%3Cpath d='M71 0 L26 26 L0 71 L-26 26 L-71 0 L-26 -26 L0 -71 L26 -26 Z' fill='none' stroke='rgba(255,255,255,0.52)' stroke-width='3'/%3E%3C/g%3E%3Cpattern id='t' width='260' height='260' patternUnits='userSpaceOnUse'%3E%3Cuse href='%23s' x='0' y='0'/%3E%3Cuse href='%23s' x='260' y='0'/%3E%3Cuse href='%23s' x='0' y='260'/%3E%3Cuse href='%23s' x='260' y='260'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='520' height='520' fill='url(%23t)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 380px 380px;
+    opacity: 0.8;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .settings-container {
+    position: relative;
+    z-index: 1;
     max-width: 900px;
     margin: 0 auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    background: var(--glass);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
     overflow: hidden;
 }
 
 .settings-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, rgba(210, 168, 90, 0.25), rgba(210, 168, 90, 0.12));
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
     padding: 30px;
     text-align: center;
 }
@@ -31,11 +74,12 @@ body {
 .settings-header h1 {
     font-size: 32px;
     margin-bottom: 10px;
+    font-weight: 600;
 }
 
 .settings-header p {
     font-size: 16px;
-    opacity: 0.9;
+    color: var(--muted);
 }
 
 .settings-content {
@@ -45,7 +89,7 @@ body {
 .settings-section {
     margin-bottom: 40px;
     padding-bottom: 30px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
 }
 
 .settings-section:last-of-type {
@@ -55,11 +99,12 @@ body {
 .settings-section h2 {
     font-size: 24px;
     margin-bottom: 20px;
-    color: #667eea;
+    color: var(--brass);
+    font-weight: 600;
 }
 
 .section-description {
-    color: #666;
+    color: var(--muted);
     margin-bottom: 15px;
     font-size: 14px;
 }
@@ -75,11 +120,17 @@ body {
     margin-bottom: 20px;
 }
 
+.form-hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
 label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
+    font-weight: 500;
+    color: var(--muted);
     font-size: 14px;
 }
 
@@ -88,11 +139,19 @@ input[type="number"],
 input[type="date"],
 select {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     font-size: 14px;
-    transition: border-color 0.3s;
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="date"]::placeholder {
+    color: rgba(255, 255, 255, 0.45);
 }
 
 input[type="text"]:focus,
@@ -100,19 +159,30 @@ input[type="number"]:focus,
 input[type="date"]:focus,
 select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--brass);
+    box-shadow: 0 0 0 2px rgba(210, 168, 90, 0.25);
+}
+
+select {
+    cursor: pointer;
+}
+
+select option {
+    background: var(--bg-olive);
+    color: var(--text);
 }
 
 input[type="range"] {
     width: 70%;
     margin-right: 10px;
+    accent-color: var(--brass);
 }
 
 input[type="range"] + span {
     display: inline-block;
     min-width: 50px;
     font-weight: 600;
-    color: #667eea;
+    color: var(--brass);
 }
 
 .checkbox-label {
@@ -120,43 +190,47 @@ input[type="range"] + span {
     align-items: center;
     cursor: pointer;
     font-weight: normal;
+    color: var(--muted);
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
-    cursor: pointer;
     width: 20px;
     height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: var(--brass);
 }
 
 .btn {
     padding: 12px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    font-family: inherit;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--brass), #c99748);
+    color: #0f1a16;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(210, 168, 90, 0.4);
 }
 
 .btn-secondary {
-    background: #f0f0f0;
-    color: #333;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-    background: #e0e0e0;
+    background: rgba(255, 255, 255, 0.18);
+    border-color: var(--brass);
 }
 
 .form-actions {
@@ -167,21 +241,21 @@ input[type="range"] + span {
 .save-message {
     margin-top: 15px;
     padding: 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
     text-align: center;
 }
 
 .save-message.success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background: rgba(40, 80, 50, 0.5);
+    color: #a8e6a0;
+    border: 1px solid rgba(80, 160, 100, 0.5);
 }
 
 .save-message.error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: rgba(80, 40, 40, 0.5);
+    color: #f0a0a0;
+    border: 1px solid rgba(160, 80, 80, 0.5);
 }
 
 .save-message.hidden {
@@ -191,8 +265,9 @@ input[type="range"] + span {
 .ramadan-dates {
     margin-top: 20px;
     padding: 20px;
-    background: #f8f9fa;
-    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
 }
 
 .ramadan-dates.hidden {
@@ -203,11 +278,11 @@ input[type="range"] + span {
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .settings-header h1 {
         font-size: 24px;
     }
-    
+
     .settings-content {
         padding: 20px;
     }

@@ -4,27 +4,27 @@
    ============================================ */
 
 :root {
-  /* Earth background */
-  --bg-olive: #0f1a16;
-  --bg-earth: #2b241b;
+  /* Earth background — brighter for well-lit rooms */
+  --bg-olive: #1a2a22;
+  --bg-earth: #3d3528;
 
-  /* Text */
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.72);
+  /* Text — full contrast for readability */
+  --text: rgba(255, 255, 255, 1);
+  --muted: rgba(255, 255, 255, 0.88);
 
-  /* Glass UI */
-  --glass: rgba(10, 10, 10, 0.42);
-  --border: rgba(255, 255, 255, 0.1);
+  /* Glass UI — lighter so tiles stand out */
+  --glass: rgba(30, 30, 28, 0.5);
+  --border: rgba(255, 255, 255, 0.18);
 
   /* Accent (Next prayer) */
-  --brass: #d2a85a;
-  --glow: rgba(210, 168, 90, 0.35);
+  --brass: #e4b85e;
+  --glow: rgba(210, 168, 90, 0.5);
 
   --radius: 26px;
   --blur: 18px;
 }
 
-/* Layer 1 — Earthy gradient base */
+/* Layer 1 — Earthy gradient base (bright for well-lit rooms) */
 body {
   margin: 0;
   min-height: 100vh;
@@ -33,7 +33,7 @@ body {
   overflow: hidden;
 
   background:
-    radial-gradient(900px 600px at 70% 85%, rgba(210, 168, 90, 0.1), transparent 60%),
+    radial-gradient(900px 600px at 70% 85%, rgba(210, 168, 90, 0.18), transparent 60%),
     linear-gradient(140deg, var(--bg-olive), var(--bg-earth));
 }
 
@@ -50,12 +50,12 @@ body {
   z-index: 0;
 }
 
-/* Layer 3 — Vignette (frame effect) */
+/* Layer 3 — Light vignette only (bright room: minimal darkening) */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle, transparent 55%, rgba(0, 0, 0, 0.55));
+  background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.2));
   pointer-events: none;
 }
 
@@ -75,11 +75,11 @@ body::after {
 }
 .masjid-name {
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.95);
 }
 .last-updated {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 /* Container — vertically center the whole block */
@@ -110,7 +110,7 @@ body::after {
   text-align: center;
 }
 
-/* Time: visual anchor */
+/* Time: visual anchor — bright for room visibility */
 #current-time.time,
 .current-time {
   font-size: 115px;
@@ -119,15 +119,17 @@ body::after {
   color: var(--text);
   line-height: 1.1;
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Next prayer + countdown (second largest) */
 .next-prayer-line {
   font-size: clamp(36px, 4.5vw, 48px);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 1);
   margin-top: 8px;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 .next-prayer-line .urgent { color: var(--accent); }
 .next-prayer-line .warning { color: #e8c547; }
@@ -146,7 +148,7 @@ body::after {
 .dateLine {
   margin-top: 0;
   font-size: 28px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 400;
 }
 
@@ -180,13 +182,13 @@ body::after {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   overflow: hidden;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
 }
 
 .prayerCell {
   padding: clamp(12px, 2.5vw, 22px) clamp(8px, 1.5vw, 18px);
   text-align: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   min-width: 0;
 }
@@ -214,7 +216,7 @@ body::after {
 .prayerCell .prayerIqama {
   margin-top: 2px;
   font-size: clamp(16px, 2.2vw, 20px);
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.78);
   font-variant-numeric: tabular-nums;
   display: block;
   white-space: nowrap;
@@ -222,8 +224,8 @@ body::after {
 
 /* Next prayer: single highlight */
 .prayerCell.next {
-  background: rgba(210, 168, 90, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(210, 168, 90, 0.28), 0 0 22px var(--glow);
+  background: rgba(210, 168, 90, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(210, 168, 90, 0.45), 0 0 22px var(--glow);
 }
 .prayerCell.next .prayerName {
   color: rgba(255, 255, 255, 0.9);
