@@ -12,11 +12,27 @@
     <link rel="stylesheet" href="overlays/ramadanOverlay.css">
 </head>
 <body>
+    <!-- Inlined so <use href="#id"> updates correctly in Chromium (external SVG fragment change is unreliable) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+      <defs>
+        <style>.m-stroke{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.m-fill{fill:currentColor}.m-muted{opacity:.55}</style>
+        <symbol id="moon-new" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><circle class="m-fill m-muted" cx="32" cy="32" r="18"/></symbol>
+        <symbol id="moon-wax-crescent" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 1 0 0 36a14 14 0 1 1 0-36z" opacity=".75"/></symbol>
+        <symbol id="moon-first-quarter" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 0 1 0 36z" opacity=".78"/></symbol>
+        <symbol id="moon-wax-gibbous" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 0 1 0 36a10 10 0 1 0 0-36z" opacity=".80"/></symbol>
+        <symbol id="moon-full" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><circle class="m-fill" cx="32" cy="32" r="18" opacity=".78"/></symbol>
+        <symbol id="moon-wane-gibbous" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 0 0 0 36a10 10 0 0 1 0-36z" opacity=".80"/></symbol>
+        <symbol id="moon-last-quarter" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 0 0 0 36z" opacity=".78"/></symbol>
+        <symbol id="moon-wane-crescent" viewBox="0 0 64 64"><circle class="m-stroke" cx="32" cy="32" r="22"/><path class="m-fill" d="M32 14a18 18 0 1 1 0 36a14 14 0 1 0 0-36z" opacity=".75"/></symbol>
+      </defs>
+    </svg>
     <div class="pattern" aria-hidden="true"></div>
 
     <header class="header-bar" id="header-bar">
         <span class="masjid-name" id="masjid-name">MET Mosque</span>
-        <span class="last-updated" id="last-updated">Updated Feb 2026</span>
+        <span class="moon-phase" id="moon-phase" aria-hidden="true" title="">
+            <svg class="moon-phase-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="#moon-full"></use></svg>
+        </span>
     </header>
 
     <div class="container">
@@ -74,6 +90,7 @@
 
         <!-- Ramadan Countdown (shows 2 weeks before Ramadan) -->
         <div id="ramadan-countdown" class="ramadan-countdown hidden">
+            <svg class="ramadan-countdown-moon" viewBox="0 0 64 64" aria-hidden="true"><use href="#moon-full"></use></svg>
             <span id="ramadan-countdown-text">Ramadan begins in 14 days</span>
         </div>
 

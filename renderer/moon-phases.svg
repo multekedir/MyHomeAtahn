@@ -1,0 +1,59 @@
+<!-- moon-phases.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <!-- Common style: use currentColor so you can tint via CSS -->
+    <style>
+      .m-stroke{ fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+      .m-fill{ fill:currentColor; }
+      .m-muted{ opacity:.55; }
+    </style>
+
+    <!-- 0: New Moon -->
+    <symbol id="moon-new" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <circle class="m-fill m-muted" cx="32" cy="32" r="18"/>
+    </symbol>
+
+    <!-- 1: Waxing Crescent -->
+    <symbol id="moon-wax-crescent" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 1 0 0 36a14 14 0 1 1 0-36z" opacity=".75"/>
+    </symbol>
+
+    <!-- 2: First Quarter -->
+    <symbol id="moon-first-quarter" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 0 1 0 36z" opacity=".78"/>
+    </symbol>
+
+    <!-- 3: Waxing Gibbous -->
+    <symbol id="moon-wax-gibbous" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 0 1 0 36a10 10 0 1 0 0-36z" opacity=".80"/>
+    </symbol>
+
+    <!-- 4: Full Moon -->
+    <symbol id="moon-full" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <circle class="m-fill" cx="32" cy="32" r="18" opacity=".78"/>
+    </symbol>
+
+    <!-- 5: Waning Gibbous -->
+    <symbol id="moon-wane-gibbous" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 0 0 0 36a10 10 0 0 1 0-36z" opacity=".80"/>
+    </symbol>
+
+    <!-- 6: Last Quarter -->
+    <symbol id="moon-last-quarter" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 0 0 0 36z" opacity=".78"/>
+    </symbol>
+
+    <!-- 7: Waning Crescent -->
+    <symbol id="moon-wane-crescent" viewBox="0 0 64 64">
+      <circle class="m-stroke" cx="32" cy="32" r="22"/>
+      <path class="m-fill" d="M32 14a18 18 0 1 1 0 36a14 14 0 1 0 0-36z" opacity=".75"/>
+    </symbol>
+  </defs>
+</svg>

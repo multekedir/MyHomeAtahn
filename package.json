@@ -18,7 +18,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "adhan": "^4.0.0",
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
     "hijri-converter": "^1.1.1"

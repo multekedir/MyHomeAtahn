@@ -81,9 +81,15 @@ body::after {
   font-weight: 600;
   color: var(--text);
 }
-.last-updated {
-  font-size: 13px;
-  color: var(--text-3);
+.moon-phase {
+  display: flex;
+  align-items: center;
+  color: var(--text-2);
+}
+.moon-phase-icon {
+  width: 48px;
+  height: 48px;
+  color: inherit;
 }
 
 .container {
@@ -261,6 +267,9 @@ body::after {
   transform: translateX(-50%);
   z-index: 20;
 
+  display: flex;
+  align-items: center;
+  gap: 14px;
   padding: 16px 40px;
   background: var(--surface);
   backdrop-filter: blur(12px);
@@ -274,6 +283,13 @@ body::after {
   text-align: center;
 
   animation: pulseGlowLight 2s ease-in-out infinite;
+}
+
+.ramadan-countdown-moon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: inherit;
 }
 
 .ramadan-countdown.hidden {

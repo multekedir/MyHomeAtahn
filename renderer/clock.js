@@ -10,6 +10,7 @@ const { computeOverlayState } = require(path.join(__dirname, 'services', 'ramada
 const { getDateKey } = require(path.join(__dirname, 'services', 'monthKey'));
 const { loadDuas } = require(path.join(__dirname, 'services', 'duaSelector'));
 const RamadanOverlay = require(path.join(__dirname, 'overlays', 'ramadanOverlay.js'));
+const MoonCalc = require(path.join(__dirname, 'moon.js'));
 
 class AthanClock {
     constructor() {
@@ -28,6 +29,7 @@ class AthanClock {
         this.ramadanOverlayTestEvent = 'maghrib';
         /** Fixed target times for test countdown (set when shortcut pressed so countdown actually decreases) */
         this.ramadanOverlayTestTargets = null;
+        this.moonCalc = new MoonCalc();
 
         this.init();
     }
@@ -172,15 +174,32 @@ class AthanClock {
     updateHeader() {
         const masjidEl = document.getElementById('masjid-name');
         if (masjidEl) masjidEl.textContent = MASJID_DISPLAY_NAME;
-        const updatedEl = document.getElementById('last-updated');
-        if (!updatedEl) return;
-        if (this.metMonth && this.metMonth.monthKey) {
-            const [y, m] = this.metMonth.monthKey.split('-');
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            updatedEl.textContent = `Updated ${monthNames[parseInt(m, 10) - 1]} ${y}`;
-        } else {
-            updatedEl.textContent = 'Updated —';
+        this.updateMoonPhase();
+    }
+
+    /** Map phase fraction (0–1) to moon-phases.svg symbol id; update icon in top-right. */
+    updateMoonPhase() {
+        const container = document.getElementById('moon-phase');
+        if (!container) return;
+        const useEl = container.querySelector('svg use');
+        if (!useEl) return;
+        const phase = this.moonCalc.getPhase(new Date());
+        const symbolId = this.phaseToSymbolId(phase.phase);
+        const href = `#${symbolId}`;
+        if (useEl.getAttribute('href') !== href) {
+            useEl.setAttribute('href', href);
         }
+        const title = `${phase.name} • ${(phase.illumination * 100).toFixed(0)}%`;
+        if (container.getAttribute('title') !== title) {
+            container.setAttribute('title', title);
+        }
+    }
+
+    phaseToSymbolId(phaseFraction) {
+        const symbols = ['moon-new', 'moon-wax-crescent', 'moon-first-quarter', 'moon-wax-gibbous', 'moon-full', 'moon-wane-gibbous', 'moon-last-quarter', 'moon-wane-crescent'];
+        const p = ((phaseFraction % 1) + 1) % 1;
+        const index = Math.round(p * 8) % 8;
+        return symbols[index];
     }
 
     updateClock() {
@@ -204,19 +223,26 @@ class AthanClock {
         }
 
         this.updateRamadanCountdown();
+        this.updateMoonPhase();
     }
 
     updateRamadanCountdown() {
         const countdownEl = document.getElementById('ramadan-countdown');
         const countdownTextEl = document.getElementById('ramadan-countdown-text');
+        const moonUse = countdownEl?.querySelector('.ramadan-countdown-moon use');
         if (!countdownEl || !countdownTextEl) return;
         const daysUntil = this.calculator.getDaysUntilRamadan();
         if (daysUntil > 0 && daysUntil <= 14) {
             countdownEl.classList.remove('hidden');
             if (daysUntil === 1) {
-                countdownTextEl.textContent = '🌙 Ramadan begins tomorrow!';
+                countdownTextEl.textContent = 'Ramadan begins tomorrow!';
             } else {
-                countdownTextEl.textContent = `🌙 Ramadan begins in ${daysUntil} days`;
+                countdownTextEl.textContent = `Ramadan begins in ${daysUntil} days`;
+            }
+            if (moonUse) {
+                const phase = this.moonCalc.getPhase(new Date());
+                const symbolId = this.phaseToSymbolId(phase.phase);
+                moonUse.setAttribute('href', `#${symbolId}`);
             }
         } else {
             countdownEl.classList.add('hidden');
@@ -291,12 +317,14 @@ class AthanClock {
     updateNextPrayer() {
         this.nextPrayer = this.calculator.getNextPrayer();
 
-        // Hero line: "Next: Maghrib • 46 min"
+        // Hero line: "Next: Maghrib" or "Next: Maghrib • MM:SS" (countdown only when < 60 min)
         const nextLineEl = document.getElementById('next-prayer-line');
         if (nextLineEl) {
             if (this.nextPrayer) {
                 const name = this.nextPrayer.name.charAt(0).toUpperCase() + this.nextPrayer.name.slice(1);
-                nextLineEl.textContent = `Next: ${name} • ${this.nextPrayer.countdown}`;
+                const msUntil = this.nextPrayer.time.getTime() - Date.now();
+                const showCountdown = msUntil < 60 * 60 * 1000;
+                nextLineEl.textContent = showCountdown ? `Next: ${name} • ${this.nextPrayer.countdown}` : `Next: ${name}`;
                 const warning = this.calculator.getPrayerWarning(this.nextPrayer);
                 nextLineEl.classList.remove('warning', 'urgent');
                 if (warning === 'urgent') nextLineEl.classList.add('urgent');
